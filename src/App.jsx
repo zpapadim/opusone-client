@@ -45,7 +45,7 @@ import {
 } from './constants';
 
 // Configure PDF Worker
-pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
+pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
 // Helper to calculate SHA-256 hash of a file
 const calculateFileHash = async (file) => {
@@ -789,7 +789,7 @@ function App() {
     // Helper to render PDF page to image
     const convertPdfToImage = async (file) => {
         const arrayBuffer = await file.arrayBuffer();
-        const pdf = await pdfjs.getDocument(arrayBuffer).promise;
+        const pdf = await pdfjs.getDocument({ data: arrayBuffer }).promise;
         const page = await pdf.getPage(1);
         const viewport = page.getViewport({ scale: 2.0 }); // Higher scale for better OCR
         
