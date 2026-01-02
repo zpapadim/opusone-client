@@ -2226,6 +2226,11 @@ function App() {
                                         )}
                                     </div>
 
+                                    <div className={`flex items-center rounded-lg p-1 gap-1 ${darkMode || isFullscreen ? 'bg-slate-700 text-slate-300' : 'bg-slate-100 text-slate-500'}`}>
+                                        <button onClick={() => handleMediaSearch('youtube')} className="p-1.5 rounded hover:bg-white hover:text-red-500 transition-colors" title="Search YouTube"><Video size={16}/></button>
+                                        <button onClick={() => handleMediaSearch('spotify')} className="p-1.5 rounded hover:bg-white hover:text-green-500 transition-colors" title="Search Spotify"><Music size={16}/></button>
+                                        <button onClick={() => handleMediaSearch('soundcloud')} className="p-1.5 rounded hover:bg-white hover:text-orange-500 transition-colors" title="Search SoundCloud"><Repeat size={16}/></button>
+                                    </div>
                                     <button onClick={() => setShowMetronome(!showMetronome)} className={`p-2 rounded-lg ${showMetronome ? 'bg-indigo-600 text-white' : 'hover:bg-slate-200/20'}`} title="Metronome"><MetronomeIcon size={18} /></button>
                                     <button
                                         onClick={() => {
