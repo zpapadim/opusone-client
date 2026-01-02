@@ -140,6 +140,8 @@ function App() {
     const clearAllFilters = () => {
         setActiveFilters([]);
         setSearchQuery('');
+        setSelectedFolder(null);
+        setGroupBy('');
     };
 
     const [formData, setFormData] = useState({
@@ -1682,6 +1684,18 @@ function App() {
 
                         {/* Search and Filters */}
                         <div className={`p-3 border-b flex-shrink-0 ${darkMode ? 'border-slate-700' : 'border-slate-100'}`}>
+                            <div className="flex items-center justify-between mb-3 px-1">
+                                <h3 className={`text-[10px] font-bold uppercase tracking-widest ${darkMode ? 'text-slate-500' : 'text-slate-400'}`}>Search & Filters</h3>
+                                {(searchQuery || activeFilters.length > 0 || selectedFolder || groupBy) && (
+                                    <button 
+                                        onClick={clearAllFilters}
+                                        className="text-[10px] font-bold text-indigo-500 hover:text-indigo-400 flex items-center gap-1"
+                                        title="Clear all filters, search, folder and grouping"
+                                    >
+                                        <Eraser size={12} /> CLEAR ALL
+                                    </button>
+                                )}
+                            </div>
                             {/* Search input */}
                             <div className="relative mb-3">
                                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
