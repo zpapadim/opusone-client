@@ -1303,6 +1303,8 @@ function App() {
         </div>
     ); // Original filtering logic is already applied in fetchData/backend
 
+    const filteredSheets = sheets; // Original filtering logic is already applied in fetchData/backend
+
     // Helper to group sheets
     const groupedSheets = useMemo(() => {
         if (!groupBy) return { 'All Sheets': filteredSheets };
@@ -2060,9 +2062,9 @@ function App() {
                 <div className={`flex-1 flex flex-col h-full overflow-hidden transition-colors ${isFullscreen || darkMode ? 'bg-slate-900' : 'bg-slate-100'}`}>
                     {selectedSheet ? (
                         <div className="flex flex-col h-full relative">
-                            <div className={`${isFullscreen || darkMode ? 'bg-slate-800 border-slate-700 text-slate-200' : 'bg-white border-slate-200 text-slate-800'} border-b px-4 py-2 flex justify-between items-center shadow-sm z-20 transition-colors overflow-x-auto no-scrollbar`}>
-                                <div className="flex items-center gap-4 flex-shrink-0">
-                                    <div className="flex flex-col">
+                            <div className={`${isFullscreen || darkMode ? 'bg-slate-800 border-slate-700 text-slate-200' : 'bg-white border-slate-200 text-slate-800'} border-b px-4 py-2 flex justify-between items-center shadow-sm z-20 transition-colors`}>
+                                <div className="flex items-center gap-4 flex-1 overflow-x-auto no-scrollbar mask-fade-right">
+                                    <div className="flex flex-col flex-shrink-0">
                                         <h2 className="font-bold text-sm">{selectedSheet.title}</h2>
                                         <span className="text-xs opacity-70">{selectedSheet.composer}</span>
                                     </div>
