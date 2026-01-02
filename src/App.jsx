@@ -117,6 +117,14 @@ function App() {
     const [expandedGroups, setExpandedGroups] = useState({}); // { "Beethoven": true }
     const [sortConfig, setSortConfig] = useState({ key: 'title', direction: 'asc' });
 
+    const handleSort = (key) => {
+        let direction = 'asc';
+        if (sortConfig.key === key && sortConfig.direction === 'asc') {
+            direction = 'desc';
+        }
+        setSortConfig({ key, direction });
+    };
+
     // Filter format: { type: 'instrument'|'genre'|'difficulty'|'composer', value: string }
 
     const addFilter = (type, value) => {
