@@ -2066,8 +2066,8 @@ function App() {
                                     <div onClick={() => handleSort('instrument')} className="col-span-2 cursor-pointer hover:text-indigo-500 flex items-center gap-1.5 transition-colors group">
                                         Inst. {sortConfig.key === 'instrument' ? (sortConfig.direction === 'asc' ? <ChevronDown size={12} className="text-indigo-500" /> : <ChevronDown size={12} className="text-indigo-500 rotate-180" />) : <ChevronDown size={12} className="opacity-0 group-hover:opacity-50" />}
                                     </div>
-                                    <div onClick={() => handleSort('genre')} className="col-span-2 cursor-pointer hover:text-indigo-500 flex items-center gap-1.5 transition-colors group">
-                                        Genre {sortConfig.key === 'genre' ? (sortConfig.direction === 'asc' ? <ChevronDown size={12} className="text-indigo-500" /> : <ChevronDown size={12} className="text-indigo-500 rotate-180" />) : <ChevronDown size={12} className="opacity-0 group-hover:opacity-50" />}
+                                    <div onClick={() => handleSort('genre_name')} className="col-span-2 cursor-pointer hover:text-indigo-500 flex items-center gap-1.5 transition-colors group">
+                                        Genre {sortConfig.key === 'genre_name' ? (sortConfig.direction === 'asc' ? <ChevronDown size={12} className="text-indigo-500" /> : <ChevronDown size={12} className="text-indigo-500 rotate-180" />) : <ChevronDown size={12} className="opacity-0 group-hover:opacity-50" />}
                                     </div>
                                     <div onClick={() => handleSort('difficulty')} className="col-span-1 text-right cursor-pointer hover:text-indigo-500 flex items-center justify-end gap-1.5 transition-colors group">
                                         Diff. {sortConfig.key === 'difficulty' ? (sortConfig.direction === 'asc' ? <ChevronDown size={12} className="text-indigo-500" /> : <ChevronDown size={12} className="text-indigo-500 rotate-180" />) : <ChevronDown size={12} className="opacity-0 group-hover:opacity-50" />}
