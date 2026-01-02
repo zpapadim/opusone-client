@@ -1,12 +1,14 @@
 import { useState } from 'react';
-import { X, Lock, Check, AlertCircle } from 'lucide-react';
+import { X, Lock, Check, AlertCircle, Trash2 } from 'lucide-react';
 import axios from 'axios';
 import { API_URL } from '../constants';
+import { useAuth } from '../context/AuthContext'; // Import useAuth for logout
 
 // AUTH_URL helper - assuming API_URL is .../api/sheets, we want .../api/auth
 const AUTH_URL = API_URL.replace('/sheets', '/auth');
 
 const SettingsModal = ({ darkMode, onClose }) => {
+    const { logout } = useAuth();
     const [activeTab, setActiveTab] = useState('account');
     const [formData, setFormData] = useState({
         currentPassword: '',
@@ -15,6 +17,7 @@ const SettingsModal = ({ darkMode, onClose }) => {
     });
     const [status, setStatus] = useState({ type: '', message: '' });
     const [isLoading, setIsLoading] = useState(false);
+    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
     const handleInputChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -52,6 +55,23 @@ const SettingsModal = ({ darkMode, onClose }) => {
         }
     };
 
+    const handleDeleteAccount = async () => {
+        if (!window.confirm('Are you absolutely sure? This cannot be undone.')) return;
+        
+        setIsLoading(true);
+        try {
+            await axios.delete(`${AUTH_URL}/delete-account`);
+            onClose();
+            logout(); // Log out the user
+        } catch (err) {
+            setStatus({ 
+                type: 'error', 
+                message: err.response?.data?.error || 'Failed to delete account' 
+            });
+            setIsLoading(false);
+        }
+    };
+
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
             <div className={`w-full max-w-md rounded-2xl shadow-2xl overflow-hidden ${darkMode ? 'bg-slate-800' : 'bg-white'}`}>
@@ -64,7 +84,7 @@ const SettingsModal = ({ darkMode, onClose }) => {
                 </div>
 
                 <div className="flex">
-                    {/* Sidebar (simplified for now as we only have one section) */}
+                    {/* Sidebar */}
                     <div className={`w-1/3 border-r p-2 ${darkMode ? 'border-slate-700 bg-slate-800/50' : 'border-slate-100 bg-slate-50'}`}>
                         <button
                             className={`w-full text-left px-3 py-2 rounded-lg text-sm font-medium flex items-center gap-2 ${
@@ -75,6 +95,16 @@ const SettingsModal = ({ darkMode, onClose }) => {
                             onClick={() => setActiveTab('account')}
                         >
                             <Lock size={16} /> Security
+                        </button>
+                        <button
+                            className={`w-full text-left px-3 py-2 rounded-lg text-sm font-medium flex items-center gap-2 mt-1 ${
+                                activeTab === 'danger'
+                                    ? (darkMode ? 'bg-red-900/50 text-red-200' : 'bg-red-50 text-red-700')
+                                    : (darkMode ? 'text-slate-400 hover:text-white hover:bg-slate-700' : 'text-slate-600 hover:bg-slate-100')
+                            }`}
+                            onClick={() => setActiveTab('danger')}
+                        >
+                            <AlertCircle size={16} /> Danger Zone
                         </button>
                     </div>
 
@@ -156,6 +186,53 @@ const SettingsModal = ({ darkMode, onClose }) => {
                                         </button>
                                     </div>
                                 </form>
+                            </div>
+                        )}
+
+                        {activeTab === 'danger' && (
+                            <div>
+                                <h3 className="text-sm font-bold uppercase tracking-wider mb-4 text-red-500">
+                                    Danger Zone
+                                </h3>
+                                <p className={`text-sm mb-6 ${darkMode ? 'text-slate-400' : 'text-slate-600'}`}>
+                                    Deleting your account is permanent. All your sheets, annotations, and data will be wiped immediately.
+                                </p>
+                                
+                                {status.message && status.type === 'error' && (
+                                    <div className="mb-4 p-3 bg-red-900/30 text-red-400 rounded-lg text-sm flex items-start gap-2">
+                                        <AlertCircle size={16} className="mt-0.5" />
+                                        <span>{status.message}</span>
+                                    </div>
+                                )}
+
+                                {!showDeleteConfirm ? (
+                                    <button
+                                        onClick={() => setShowDeleteConfirm(true)}
+                                        className="w-full py-3 border border-red-500 text-red-500 hover:bg-red-500 hover:text-white rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2"
+                                    >
+                                        <Trash2 size={16} />
+                                        Delete My Account
+                                    </button>
+                                ) : (
+                                    <div className={`p-4 rounded-lg border ${darkMode ? 'bg-red-900/10 border-red-900/30' : 'bg-red-50 border-red-100'}`}>
+                                        <p className={`text-sm font-bold mb-2 ${darkMode ? 'text-red-400' : 'text-red-700'}`}>Are you absolutely sure?</p>
+                                        <div className="flex gap-2">
+                                            <button
+                                                onClick={handleDeleteAccount}
+                                                disabled={isLoading}
+                                                className="flex-1 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm font-medium transition-colors"
+                                            >
+                                                {isLoading ? 'Deleting...' : 'Yes, Delete Everything'}
+                                            </button>
+                                            <button
+                                                onClick={() => setShowDeleteConfirm(false)}
+                                                className={`flex-1 py-2 rounded-lg text-sm font-medium transition-colors ${darkMode ? 'bg-slate-700 hover:bg-slate-600 text-white' : 'bg-white border border-slate-200 hover:bg-slate-50 text-slate-700'}`}
+                                            >
+                                                Cancel
+                                            </button>
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                         )}
                     </div>
