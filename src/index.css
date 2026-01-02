@@ -8,3 +8,22 @@
 :root {
   font-family: "Roboto Flex", sans-serif;
 }
+
+/* Fix for mobile select options visibility */
+@media (prefers-color-scheme: dark) {
+  select option {
+    background-color: #1e293b; /* slate-800 */
+    color: #e2e8f0; /* slate-200 */
+  }
+}
+
+/* Force options to follow theme regardless of system preference if .dark class is present */
+.dark select option {
+  background-color: #1e293b;
+  color: #e2e8f0;
+}
+
+select option {
+  background-color: #ffffff;
+  color: #1e293b;
+}
