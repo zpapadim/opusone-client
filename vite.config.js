@@ -8,7 +8,7 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.svg', 'robots.txt', 'apple-touch-icon.png'],
+      includeAssets: ['favicon.svg', 'favicon.png', 'apple-touch-icon.png', 'robots.txt'],
       manifest: {
         name: 'OpusOne',
         short_name: 'OpusOne',
@@ -21,9 +21,9 @@ export default defineConfig({
             type: 'image/svg+xml'
           },
           {
-            src: 'favicon.svg',
+            src: 'favicon.png',
             sizes: '512x512',
-            type: 'image/svg+xml'
+            type: 'image/png'
           },
           {
             src: 'favicon.svg',
