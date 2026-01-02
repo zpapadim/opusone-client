@@ -115,6 +115,7 @@ function App() {
     const [viewMode, setViewMode] = useState('list'); // 'list' or 'table'
     const [groupBy, setGroupBy] = useState(''); // '' (none), 'composer', 'genre', 'difficulty', 'instrument'
     const [expandedGroups, setExpandedGroups] = useState({}); // { "Beethoven": true }
+    const [sortConfig, setSortConfig] = useState({ key: 'title', direction: 'asc' });
 
     // Filter format: { type: 'instrument'|'genre'|'difficulty'|'composer', value: string }
 
