@@ -1,16 +1,60 @@
-# React + Vite
+# OpusOne Client
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+The frontend application for OpusOne, a sheet music management platform. Built with React, Vite, and Tailwind CSS.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **Sheet Music Library:** Browse, filter, and organize your sheet music collection.
+- **PDF Viewer & Annotation:** View PDF scores and add annotations (pen, highlighter, text) directly in the browser.
+- **Practice Mode:** Auto-scrolling, metronome, and loop functionalities for effective practice.
+- **OCR Upload:** Upload images or PDFs and automatically extract metadata using the backend's OCR service.
+- **Responsive Design:** Optimized for desktop and tablet usage.
+- **Dark Mode:** Fully supported dark theme.
 
-## React Compiler
+## Tech Stack
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- **Framework:** React 18+
+- **Build Tool:** Vite
+- **Styling:** Tailwind CSS, Lucide React (Icons)
+- **PDF Handling:** React-PDF
+- **State Management:** React Context API
 
-## Expanding the ESLint configuration
+## Local Setup
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+1.  **Install Dependencies:**
+    ```bash
+    npm install
+    ```
+
+2.  **Environment Variables:**
+    Create a `.env` file in the root directory:
+    ```env
+    # URL of your backend API
+    VITE_API_URL=http://localhost:5000
+    ```
+
+3.  **Start Development Server:**
+    ```bash
+    npm run dev
+    ```
+    The app runs on `http://localhost:5173`.
+
+## Deployment
+
+This project is optimized for deployment on **Render Static Sites**, **Vercel**, or **Netlify**.
+
+### Deploying to Render (Static Site)
+
+1.  Push code to GitHub.
+2.  Create a **Static Site** on Render.
+3.  Connect your repository.
+4.  **Build Command:** `npm run build`
+5.  **Publish Directory:** `dist`
+6.  **Environment Variables:**
+    - `VITE_API_URL`: Your production backend URL (e.g., `https://opusone-api.onrender.com`)
+
+## Key Components
+
+- `App.jsx`: Main application logic, routing, and state.
+- `components/AnnotationCanvas.jsx`: Handling drawing and annotations on top of PDFs.
+- `components/PracticeMode.jsx`: Logic for practice tools like auto-scroll and metronome.
