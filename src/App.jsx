@@ -1881,8 +1881,8 @@ function App() {
                 <div className={`flex-1 flex flex-col h-full overflow-hidden transition-colors ${isFullscreen || darkMode ? 'bg-slate-900' : 'bg-slate-100'}`}>
                     {selectedSheet ? (
                         <div className="flex flex-col h-full relative">
-                            <div className={`${isFullscreen || darkMode ? 'bg-slate-800 border-slate-700 text-slate-200' : 'bg-white border-slate-200 text-slate-800'} border-b px-4 py-2 flex justify-between items-center shadow-sm z-20 transition-colors`}>
-                                <div className="flex items-center gap-4">
+                            <div className={`${isFullscreen || darkMode ? 'bg-slate-800 border-slate-700 text-slate-200' : 'bg-white border-slate-200 text-slate-800'} border-b px-4 py-2 flex justify-between items-center shadow-sm z-20 transition-colors overflow-x-auto no-scrollbar`}>
+                                <div className="flex items-center gap-4 flex-shrink-0">
                                     <div className="flex flex-col">
                                         <h2 className="font-bold text-sm">{selectedSheet.title}</h2>
                                         <span className="text-xs opacity-70">{selectedSheet.composer}</span>
@@ -1894,7 +1894,7 @@ function App() {
                                         <button onClick={() => changePage(1 * (isDualPage ? 2 : 1))} disabled={pageNumber >= numPages} className="p-1.5 rounded hover:bg-slate-200/20 disabled:opacity-30"><ChevronRight className="w-4 h-4" /></button>
                                     </div>
                                 </div>
-                                <div className="flex items-center gap-2">
+                                <div className="flex items-center gap-2 flex-shrink-0 ml-4">
                                     {(selectedSheet.file_url?.endsWith('.pdf') || selectedSheet.file_name?.endsWith('.pdf') || selectedSheet.filename?.endsWith('.pdf')) && (
                                         <div className="flex items-center bg-slate-100 rounded-lg p-1 gap-1 text-slate-500">
                                             <button onClick={() => { setIsAnnotating(true); setTool('cursor'); }} className={`p-1.5 rounded ${tool === 'cursor' && isAnnotating ? 'bg-white shadow text-indigo-600' : 'hover:text-slate-700'}`} title="Select"><MousePointer size={16}/></button>
@@ -2028,9 +2028,9 @@ function App() {
                             <h2 className={`text-lg font-bold ${darkMode ? 'text-white' : 'text-slate-800'}`}>{editingId ? 'Edit Sheet Music' : 'Add New Entry'}</h2>
                             <button onClick={() => setIsModalOpen(false)} className={darkMode ? 'text-slate-400 hover:text-white' : ''}><X size={20} /></button>
                         </div>
-                        <form onSubmit={handleSubmit} className="p-8">
-                            <div className="grid grid-cols-3 gap-6">
-                                <div className="col-span-2 space-y-4">
+                        <form onSubmit={handleSubmit} className="p-4 md:p-8">
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                <div className="md:col-span-2 space-y-4">
                                     <div className="relative">
                                         <label className={`text-[10px] font-bold uppercase tracking-widest block mb-1 ${darkMode ? 'text-slate-500' : 'text-slate-400'}`}>
                                             Title * <span className="text-indigo-400 font-normal">(auto-searches MusicBrainz)</span>
