@@ -23,7 +23,8 @@ import {
     Navbar,
     AuthModal,
     LandingPage,
-    AutosuggestInput
+    AutosuggestInput,
+    SettingsModal
 } from './components';
 
 // Import auth context
@@ -57,6 +58,7 @@ function App() {
     // Auth
     const { user, token, isAuthenticated, loading: authLoading, logout } = useAuth();
     const [showAuthModal, setShowAuthModal] = useState(false);
+    const [showSettings, setShowSettings] = useState(false);
 
     // Check for password reset token in URL on mount
     useEffect(() => {
@@ -1123,6 +1125,11 @@ function App() {
                 <AuthModal darkMode={darkMode} onClose={() => setShowAuthModal(false)} />
             )}
 
+            {/* Settings Modal */}
+            {showSettings && (
+                <SettingsModal darkMode={darkMode} onClose={() => setShowSettings(false)} />
+            )}
+
             {/* Keyboard Shortcuts Modal */}
             {showShortcuts && (
                 <KeyboardShortcutsModal darkMode={darkMode} onClose={() => setShowShortcuts(false)} />
@@ -1266,6 +1273,13 @@ function App() {
                                 <span className={`text-sm ${darkMode ? 'text-slate-300' : 'text-slate-600'}`}>
                                     {user?.displayName || user?.email?.split('@')[0]}
                                 </span>
+                                <button
+                                    onClick={() => setShowSettings(true)}
+                                    className={`p-2 rounded-lg ${darkMode ? 'hover:bg-slate-700 text-slate-400' : 'hover:bg-slate-100 text-slate-500'}`}
+                                    title="Settings"
+                                >
+                                    <Settings size={18} />
+                                </button>
                                 <button
                                     onClick={logout}
                                     className={`p-2 rounded-lg ${darkMode ? 'hover:bg-slate-700 text-slate-400' : 'hover:bg-slate-100 text-slate-500'}`}

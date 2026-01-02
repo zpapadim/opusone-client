@@ -8,3 +8,4 @@ export { default as Navbar } from './Navbar';
 export { default as AuthModal } from './AuthModal';
 export { default as LandingPage } from './LandingPage';
 export { default as AutosuggestInput } from './AutosuggestInput';
+export { default as SettingsModal } from './SettingsModal';
