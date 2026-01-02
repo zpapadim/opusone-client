@@ -2663,6 +2663,7 @@ function App() {
 }
 
 // Wrap App with AuthProvider and ErrorBoundary
+// Force rebuild timestamp: 2026-01-02
 function AppWithProviders() {
     return (
         <ErrorBoundary>
