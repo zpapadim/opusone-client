@@ -8,7 +8,8 @@ import {
     Download, ChevronDown, Type, MousePointer, Pen, Info,
     Tag, Globe, User, Layers, Eraser,
     Moon, Sun, Printer, Keyboard, Repeat, LogOut, Share2, Users,
-    CheckSquare, Square as SquareIcon, Menu, Timer as MetronomeIcon
+    CheckSquare, Square as SquareIcon, Menu, Timer as MetronomeIcon,
+    LayoutList, Table as TableIcon, Grid, ChevronDown, ChevronRight
 } from 'lucide-react';
 import { Document, Page, pdfjs } from 'react-pdf';
 
@@ -111,6 +112,10 @@ function App() {
     // Search with filters
     const [searchQuery, setSearchQuery] = useState('');
     const [activeFilters, setActiveFilters] = useState([]);
+    const [viewMode, setViewMode] = useState('list'); // 'list' or 'table'
+    const [groupBy, setGroupBy] = useState(''); // '' (none), 'composer', 'genre', 'difficulty', 'instrument'
+    const [expandedGroups, setExpandedGroups] = useState({}); // { "Beethoven": true }
+
     // Filter format: { type: 'instrument'|'genre'|'difficulty'|'composer', value: string }
 
     const addFilter = (type, value) => {
@@ -1074,11 +1079,267 @@ function App() {
         setPageNumber(1);
     };
 
-    const changePage = (delta) => {
-        setPageNumber(prev => Math.min(Math.max(1, prev + delta), numPages || 1));
+    const renderSheetCard = (sheet, index) => {
+        const canDelete = sheet.is_owner !== false || sheet.share_permission === 'full';
+        const isSelected = selectedSheetIds.has(sheet.id);
+        return (
+            <div
+                key={sheet.id}
+                onClick={(e) => handleSheetClick(e, sheet, index)}
+                onMouseDown={(e) => {
+                    // Prevent text selection when using modifier keys
+                    if (e.shiftKey || e.ctrlKey || e.metaKey) {
+                        e.preventDefault();
+                    }
+                }}
+                className={`p-4 cursor-pointer transition-colors relative group ${
+                    darkMode
+                        ? `border-b border-slate-700 ${isSelected ? 'bg-red-900/30 border-l-4 border-l-red-500' : selectedSheet?.id === sheet.id ? 'bg-indigo-900/50 border-l-4 border-l-indigo-500' : 'border-l-4 border-l-transparent hover:bg-slate-700/50'}`
+                        : `border-b border-slate-100 ${isSelected ? 'bg-red-50 border-l-4 border-l-red-500' : selectedSheet?.id === sheet.id ? 'bg-indigo-50 border-l-4 border-l-indigo-600' : 'border-l-4 border-l-transparent hover:bg-slate-50'}`
+                }`}
+            >
+                <div className="flex justify-between items-start">
+                    <div className="flex items-center gap-2 flex-1 min-w-0">
+                        {/* Checkbox for selection mode */}
+                        {isSelectionMode && (
+                            <button
+                                onClick={(e) => canDelete && toggleSheetSelection(e, sheet.id, index)}
+                                className={`flex-shrink-0 ${!canDelete ? 'opacity-30 cursor-not-allowed' : ''}`}
+                                disabled={!canDelete}
+                                title={!canDelete ? 'Cannot delete shared sheets without full permission' : ''}
+                            >
+                                {isSelected
+                                    ? <CheckSquare size={18} className="text-red-500" />
+                                    : <SquareIcon size={18} className={darkMode ? 'text-slate-500' : 'text-slate-400'} />
+                                }
+                            </button>
+                        )}
+                        <h3 className={`font-semibold text-sm truncate ${
+                            darkMode
+                                ? (selectedSheet?.id === sheet.id ? 'text-indigo-300' : 'text-slate-200')
+                                : (selectedSheet?.id === sheet.id ? 'text-indigo-900' : 'text-slate-800')
+                        }`}>{sheet.title}</h3>
+                        <button
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                if(selectedSheet?.id === sheet.id) {
+                                    setShowDetails(!showDetails);
+                                } else {
+                                    setSelectedSheet(sheet);
+                                    setShowDetails(true);
+                                }
+                            }}
+                            className={`p-1 rounded-full transition-transform ${selectedSheet?.id === sheet.id && showDetails ? 'rotate-180' : ''} ${darkMode ? 'hover:bg-slate-600' : 'hover:bg-slate-200/50'}`}
+                        >
+                            <ChevronDown size={14} className={darkMode ? 'text-slate-400' : 'text-slate-400'} />
+                        </button>
+                    </div>
+                    {!isSelectionMode && (
+                    <div className={`flex gap-1 opacity-0 group-hover:opacity-100 absolute right-2 top-3 ${darkMode ? 'bg-slate-700/80' : 'bg-white/80'} backdrop-blur-sm rounded shadow-sm`}>
+                        {sheet.is_owner !== false && (
+                            <button onClick={(e) => { e.stopPropagation(); openShareModal(sheet); }} className="p-1 text-slate-400 hover:text-green-500" title="Share"><Share2 size={14} /></button>
+                        )}
+                        <button onClick={(e) => { e.stopPropagation(); handleEdit(sheet); }} className="p-1 text-slate-400 hover:text-indigo-500" title="Edit"><Edit2 size={14} /></button>
+                        {canDelete && (
+                            <button onClick={(e) => handleDelete(e, sheet.id)} className="p-1 text-slate-400 hover:text-red-500" title="Delete"><Trash2 size={14} /></button>
+                        )}
+                    </div>
+                    )}
+                </div>
+                <p className={`text-xs ${darkMode ? 'text-slate-400' : 'text-slate-500'} ${isSelectionMode ? 'ml-6' : ''}`}>{sheet.composer}</p>
+                <div className="flex items-center gap-2 mt-2 flex-wrap">
+                    {sheet.instrument && <span className={`px-2 py-0.5 text-[10px] rounded-full ${darkMode ? 'bg-slate-700 text-slate-300' : 'bg-slate-100 text-slate-600'}`}>{sheet.instrument}</span>}
+                    {sheet.difficulty && <span className={`px-2 py-0.5 text-[10px] rounded-full ${sheet.difficulty === 'Advanced' ? (darkMode ? 'bg-amber-900/50 text-amber-400' : 'bg-amber-50 text-amber-700') : (darkMode ? 'bg-slate-700 text-slate-300' : 'bg-slate-100 text-slate-600')}`}>{sheet.difficulty}</span>}
+                    {sheet.is_owner === false && (
+                        <span className={`px-2 py-0.5 text-[10px] rounded-full flex items-center gap-1 ${darkMode ? 'bg-green-900/50 text-green-400' : 'bg-green-50 text-green-700'}`}>
+                            <Share2 size={10} /> Shared
+                        </span>
+                    )}
+                </div>
+                {/* Details Rendering (same as before) */}
+                {selectedSheet?.id === sheet.id && showDetails && (
+                    <div onClick={e => e.stopPropagation()} className={`mt-4 pt-4 border-t cursor-default animate-in slide-in-from-top-2 duration-200 ${darkMode ? 'border-slate-700' : 'border-slate-200'}`}>
+                        {/* Note: I am not copying the full details logic here to save tokens, but in a real implementation I would extract this to a separate component. For now I will assume the original logic is preserved or re-implemented if I was writing the full file. */}
+                        {/* Since I am only replacing specific blocks, I need to make sure I didn't lose the details logic in the previous replacement. I replaced the loop, so I need to put the details logic here or extract it. */}
+                        {/* I will implement a simplified version or assume the user accepts the change. Actually, I should probably put the logic back. */}
+                        {renderSheetDetails(sheet)}
+                    </div>
+                )}
+            </div>
+        );
     };
 
-    const filteredSheets = sheets;
+    const renderSheetRow = (sheet, index) => {
+        const canDelete = sheet.is_owner !== false || sheet.share_permission === 'full';
+        const isSelected = selectedSheetIds.has(sheet.id);
+        return (
+            <div
+                key={sheet.id}
+                onClick={(e) => handleSheetClick(e, sheet, index)}
+                className={`grid grid-cols-12 gap-2 px-4 py-2 border-b items-center text-xs transition-colors group cursor-pointer ${
+                    darkMode
+                        ? `border-slate-800 ${isSelected ? 'bg-red-900/30' : selectedSheet?.id === sheet.id ? 'bg-indigo-900/50' : 'hover:bg-slate-800'}`
+                        : `border-slate-100 ${isSelected ? 'bg-red-50' : selectedSheet?.id === sheet.id ? 'bg-indigo-50' : 'hover:bg-slate-50'}`
+                }`}
+            >
+                <div className="col-span-4 flex items-center gap-2 overflow-hidden">
+                    {isSelectionMode && (
+                        <button
+                            onClick={(e) => canDelete && toggleSheetSelection(e, sheet.id, index)}
+                            disabled={!canDelete}
+                        >
+                            {isSelected ? <CheckSquare size={14} className="text-red-500" /> : <SquareIcon size={14} className="text-slate-400" />}
+                        </button>
+                    )}
+                    <span className={`truncate font-medium ${darkMode ? 'text-slate-200' : 'text-slate-700'}`}>{sheet.title}</span>
+                </div>
+                <div className={`col-span-3 truncate ${darkMode ? 'text-slate-400' : 'text-slate-600'}`}>{sheet.composer}</div>
+                <div className={`col-span-2 truncate ${darkMode ? 'text-slate-500' : 'text-slate-500'}`}>{sheet.instrument}</div>
+                <div className={`col-span-2 truncate ${darkMode ? 'text-slate-500' : 'text-slate-500'}`}>{sheet.genre}</div>
+                <div className={`col-span-1 text-right ${darkMode ? 'text-slate-500' : 'text-slate-500'}`}>{sheet.difficulty === 'Intermediate' ? 'Int.' : sheet.difficulty}</div>
+            </div>
+        );
+    };
+
+    // Extracted details renderer
+    const renderSheetDetails = (sheet) => (
+        <div className="space-y-4">
+            <section className="space-y-2">
+                <h4 className={`text-[10px] font-bold uppercase tracking-widest ${darkMode ? 'text-slate-500' : 'text-slate-400'}`}>General Information</h4>
+                <div className="grid grid-cols-1 gap-1">
+                    <div className={`flex items-center gap-2 text-xs ${darkMode ? 'text-slate-300' : 'text-slate-600'}`}><User size={14} className="text-slate-400"/> <span>{sheet.composer}</span></div>
+                    {sheet.subtitle && <div className={`flex items-center gap-2 text-xs ${darkMode ? 'text-slate-300' : 'text-slate-600'}`}><FileText size={14} className="text-slate-400"/> <span>{sheet.subtitle}</span></div>}
+                    <div className={`flex items-center gap-2 text-xs ${darkMode ? 'text-slate-300' : 'text-slate-600'}`}><Layers size={14} className="text-slate-400"/> <span>{sheet.instrument}</span></div>
+                    <div className={`flex items-center gap-2 text-xs ${darkMode ? 'text-slate-300' : 'text-slate-600'}`}><Globe size={14} className="text-slate-400"/> <span>{sheet.genre}</span></div>
+                </div>
+            </section>
+            <section className="space-y-2">
+                <h4 className={`text-[10px] font-bold uppercase tracking-widest ${darkMode ? 'text-slate-500' : 'text-slate-400'}`}>Musical Specs</h4>
+                <div className="flex flex-wrap gap-2">
+                    <span className="px-2 py-1 bg-indigo-50 text-indigo-700 text-[10px] font-bold rounded">Key: {sheet.keySignature || sheet.key_signature || 'N/A'}</span>
+                    <span className="px-2 py-1 bg-indigo-50 text-indigo-700 text-[10px] font-bold rounded">Time: {sheet.timeSignature || sheet.time_signature || 'N/A'}</span>
+                    <span className="px-2 py-1 bg-indigo-50 text-indigo-700 text-[10px] font-bold rounded">BPM: {sheet.tempo || 'N/A'}</span>
+                </div>
+            </section>
+            <section className="space-y-2">
+                <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Tags</h4>
+                <div className="flex flex-wrap gap-1">
+                    {(Array.isArray(sheet.tags) ? sheet.tags : (sheet.tags || '').split(',')).map((t, i) => {
+                        const tag = typeof t === 'string' ? t.trim() : t;
+                        return tag && <span key={i} className="px-2 py-0.5 bg-slate-100 text-slate-600 text-[10px] rounded flex items-center gap-1"><Tag size={8}/>{tag}</span>;
+                    })}
+                </div>
+            </section>
+            {/* Media Section */}
+            {(() => {
+                let mediaLinks = sheet.media_links || sheet.mediaLinks || [];
+                if (typeof mediaLinks === 'string') {
+                    try { mediaLinks = JSON.parse(mediaLinks); } catch { mediaLinks = []; }
+                }
+                if (!Array.isArray(mediaLinks) || mediaLinks.length === 0) return null;
+                const firstLink = mediaLinks[0];
+                if (!firstLink || !firstLink.url) return null;
+                const getEmbedUrl = (link) => {
+                    if (!link || !link.url) return null;
+                    const url = link.url;
+                    if (link.type === 'youtube' || url.includes('youtube.com') || url.includes('youtu.be')) {
+                        const match = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\s]+)/);
+                        return match ? `https://www.youtube.com/embed/${match[1]}` : null;
+                    }
+                    if (link.type === 'spotify' || url.includes('spotify.com')) {
+                        const match = url.match(/spotify\.com\/(track|album|playlist)\/([^?\s]+)/);
+                        return match ? `https://open.spotify.com/embed/${match[1]}/${match[2]}` : null;
+                    }
+                    return null;
+                };
+                const embedUrl = getEmbedUrl(firstLink);
+                return (
+                    <section className="space-y-2">
+                        <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Media</h4>
+                        {embedUrl && (
+                            <div className="rounded-lg overflow-hidden border border-slate-200">
+                                <iframe
+                                    src={embedUrl}
+                                    width="100%"
+                                    height={firstLink.type === 'spotify' ? '80' : '150'}
+                                    frameBorder="0"
+                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                    allowFullScreen
+                                    className="w-full"
+                                />
+                            </div>
+                        )}
+                        <div className="space-y-1">
+                            {mediaLinks.filter(link => link && link.url).map((link, i) => (
+                                <div key={i} className="flex items-center gap-2 px-2 py-1.5 bg-slate-50 rounded">
+                                    <a href={link.url} target="_blank" rel="noreferrer" className="flex-1 flex items-center gap-2 hover:text-indigo-600 transition-colors">
+                                        <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${
+                                            link.type === 'youtube' ? 'bg-red-100 text-red-600' :
+                                            link.type === 'spotify' ? 'bg-green-100 text-green-600' :
+                                            link.type === 'soundcloud' ? 'bg-orange-100 text-orange-600' :
+                                            'bg-slate-200 text-slate-600'
+                                        }`}>
+                                            {(link.type || 'link').toUpperCase()}
+                                        </span>
+                                        <span className="text-xs text-slate-700 truncate">{link.title || 'Untitled'}</span>
+                                    </a>
+                                </div>
+                            ))}
+                        </div>
+                    </section>
+                );
+            })()}
+            <section className="space-y-2 pt-2 border-t border-slate-100">
+                <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Performance Notes</h4>
+                <textarea 
+                    className="w-full h-32 p-3 bg-yellow-50 border border-yellow-200 rounded-lg text-slate-700 font-mono text-xs leading-relaxed resize-none focus:ring-2 focus:ring-yellow-400 outline-none" 
+                    value={noteContent} 
+                    onChange={e => setNoteContent(e.target.value)} 
+                    placeholder="Add performance notes..."
+                    onClick={e => e.stopPropagation()}
+                />
+                <button onClick={(e) => { e.stopPropagation(); saveChanges(); }} className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2 rounded-lg text-xs font-bold">Save Notes</button>
+            </section>
+        </div>
+    ); // Original filtering logic is already applied in fetchData/backend
+
+    // Helper to group sheets
+    const groupedSheets = useMemo(() => {
+        if (!groupBy) return { 'All Sheets': filteredSheets };
+
+        const groups = {};
+        filteredSheets.forEach(sheet => {
+            let key = sheet[groupBy] || 'Unknown';
+            if (groupBy === 'genre') key = sheet.genre_name || sheet.genre || 'Unknown';
+            
+            if (!groups[key]) groups[key] = [];
+            groups[key].push(sheet);
+        });
+        
+        // Sort keys alphabetically
+        return Object.keys(groups).sort().reduce((acc, key) => {
+            acc[key] = groups[key];
+            return acc;
+        }, {});
+    }, [filteredSheets, groupBy]);
+
+    const toggleGroup = (group) => {
+        setExpandedGroups(prev => ({
+            ...prev,
+            [group]: !prev[group]
+        }));
+    };
+
+    // Auto-expand all groups when grouping changes
+    useEffect(() => {
+        if (groupBy) {
+            const allGroups = Object.keys(groupedSheets).reduce((acc, key) => {
+                acc[key] = true;
+                return acc;
+            }, {});
+            setExpandedGroups(allGroups);
+        }
+    }, [groupBy]);
 
     // Show loading while checking auth
     if (authLoading) {
@@ -1500,6 +1761,26 @@ function App() {
                                 />
                             </div>
 
+                            {/* Group By Selector */}
+                            <div className="mt-3 pt-3 border-t border-dashed border-slate-200 dark:border-slate-700">
+                                <label className={`text-[10px] font-bold uppercase tracking-widest block mb-1 ${darkMode ? 'text-slate-500' : 'text-slate-400'}`}>Group By</label>
+                                <select
+                                    value={groupBy}
+                                    onChange={(e) => setGroupBy(e.target.value)}
+                                    className={`w-full text-xs px-2 py-1.5 rounded-lg border outline-none ${
+                                        groupBy
+                                            ? 'bg-indigo-100 border-indigo-300 text-indigo-700'
+                                            : darkMode ? 'bg-slate-700 border-slate-600 text-slate-300' : 'bg-white border-slate-200 text-slate-600'
+                                    }`}
+                                >
+                                    <option value="">None (Flat List)</option>
+                                    <option value="composer">Composer</option>
+                                    <option value="genre">Genre</option>
+                                    <option value="difficulty">Difficulty</option>
+                                    <option value="instrument">Instrument</option>
+                                </select>
+                            </div>
+
                             {/* Active filters & results count */}
                             {(searchQuery || activeFilters.length > 0) && (
                                 <div className={`mt-2 pt-2 border-t flex items-center justify-between ${darkMode ? 'border-slate-700' : 'border-slate-200'}`}>
@@ -1653,9 +1934,9 @@ function App() {
                             )}
                         </div>
 
-                        {/* Selection Mode Toolbar */}
-                        {isSelectionMode ? (
-                            <div className={`p-3 border-b flex items-center justify-between ${darkMode ? 'border-slate-700 bg-red-900/20' : 'border-slate-200 bg-red-50'}`}>
+                        {/* Selection Mode & View Toggle Toolbar */}
+                        <div className={`p-2 border-b flex items-center justify-between ${isSelectionMode ? (darkMode ? 'bg-red-900/20 border-slate-700' : 'bg-red-50 border-slate-200') : (darkMode ? 'border-slate-700' : 'border-slate-200')}`}>
+                            {isSelectionMode ? (
                                 <div className="flex items-center gap-3">
                                     <button
                                         onClick={toggleSelectAll}
@@ -1671,215 +1952,105 @@ function App() {
                                         {selectedSheetIds.size} selected
                                     </span>
                                 </div>
+                            ) : (
                                 <div className="flex items-center gap-2">
-                                    <button
-                                        onClick={handleMassDelete}
-                                        disabled={selectedSheetIds.size === 0}
-                                        className="flex items-center gap-1 px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white text-xs font-medium rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
-                                    >
-                                        <Trash2 size={14} />
-                                        Delete Selected
-                                    </button>
-                                    <button
-                                        onClick={exitSelectionMode}
-                                        className={`px-3 py-1.5 text-xs font-medium rounded-lg ${darkMode ? 'bg-slate-700 hover:bg-slate-600 text-slate-300' : 'bg-slate-200 hover:bg-slate-300 text-slate-700'}`}
-                                    >
-                                        Cancel
-                                    </button>
+                                    {/* View Mode Toggles */}
+                                    <div className={`flex items-center p-0.5 rounded-lg ${darkMode ? 'bg-slate-800' : 'bg-slate-100'}`}>
+                                        <button
+                                            onClick={() => setViewMode('list')}
+                                            className={`p-1.5 rounded-md transition-all ${viewMode === 'list' ? (darkMode ? 'bg-slate-600 text-white shadow' : 'bg-white text-indigo-600 shadow') : (darkMode ? 'text-slate-400 hover:text-slate-200' : 'text-slate-500 hover:text-slate-700')}`}
+                                            title="List View"
+                                        >
+                                            <LayoutList size={16} />
+                                        </button>
+                                        <button
+                                            onClick={() => setViewMode('table')}
+                                            className={`p-1.5 rounded-md transition-all ${viewMode === 'table' ? (darkMode ? 'bg-slate-600 text-white shadow' : 'bg-white text-indigo-600 shadow') : (darkMode ? 'text-slate-400 hover:text-slate-200' : 'text-slate-500 hover:text-slate-700')}`}
+                                            title="Table View"
+                                        >
+                                            <TableIcon size={16} />
+                                        </button>
+                                    </div>
                                 </div>
+                            )}
+
+                            <div className="flex items-center gap-2">
+                                {isSelectionMode ? (
+                                    <>
+                                        <button
+                                            onClick={handleMassDelete}
+                                            disabled={selectedSheetIds.size === 0}
+                                            className="flex items-center gap-1 px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white text-xs font-medium rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                                        >
+                                            <Trash2 size={14} />
+                                            Delete
+                                        </button>
+                                        <button
+                                            onClick={exitSelectionMode}
+                                            className={`px-3 py-1.5 text-xs font-medium rounded-lg ${darkMode ? 'bg-slate-700 hover:bg-slate-600 text-slate-300' : 'bg-slate-200 hover:bg-slate-300 text-slate-700'}`}
+                                        >
+                                            Cancel
+                                        </button>
+                                    </>
+                                ) : (
+                                    <button
+                                        onClick={() => setIsSelectionMode(true)}
+                                        className={`flex items-center gap-1.5 px-2 py-1 text-xs font-medium rounded ${darkMode ? 'text-slate-400 hover:text-slate-200 hover:bg-slate-700' : 'text-slate-500 hover:text-slate-700 hover:bg-slate-100'}`}
+                                    >
+                                        <CheckSquare size={14} />
+                                        Select
+                                    </button>
+                                )}
                             </div>
-                        ) : (
-                            <div className={`p-2 border-b flex justify-end ${darkMode ? 'border-slate-700' : 'border-slate-200'}`}>
-                                <button
-                                    onClick={() => setIsSelectionMode(true)}
-                                    className={`flex items-center gap-1.5 px-2 py-1 text-xs font-medium rounded ${darkMode ? 'text-slate-400 hover:text-slate-200 hover:bg-slate-700' : 'text-slate-500 hover:text-slate-700 hover:bg-slate-100'}`}
-                                >
-                                    <CheckSquare size={14} />
-                                    Select
-                                </button>
-                            </div>
-                        )}
+                        </div>
 
                         <div className={`flex-1 overflow-y-auto ${isSelectionMode ? 'select-none' : ''}`}>
-                            {filteredSheets.map((sheet, index) => {
-                                const canDelete = sheet.is_owner !== false || sheet.share_permission === 'full';
-                                const isSelected = selectedSheetIds.has(sheet.id);
-                                return (
-                                <div
-                                    key={sheet.id}
-                                    onClick={(e) => handleSheetClick(e, sheet, index)}
-                                    onMouseDown={(e) => {
-                                        // Prevent text selection when using modifier keys
-                                        if (e.shiftKey || e.ctrlKey || e.metaKey) {
-                                            e.preventDefault();
-                                        }
-                                    }}
-                                    className={`p-4 cursor-pointer transition-colors relative group ${
-                                        darkMode
-                                            ? `border-b border-slate-700 ${isSelected ? 'bg-red-900/30 border-l-4 border-l-red-500' : selectedSheet?.id === sheet.id ? 'bg-indigo-900/50 border-l-4 border-l-indigo-500' : 'border-l-4 border-l-transparent hover:bg-slate-700/50'}`
-                                            : `border-b border-slate-100 ${isSelected ? 'bg-red-50 border-l-4 border-l-red-500' : selectedSheet?.id === sheet.id ? 'bg-indigo-50 border-l-4 border-l-indigo-600' : 'border-l-4 border-l-transparent hover:bg-slate-50'}`
-                                    }`}
-                                >
-                                    <div className="flex justify-between items-start">
-                                        <div className="flex items-center gap-2 flex-1 min-w-0">
-                                            {/* Checkbox for selection mode */}
-                                            {isSelectionMode && (
-                                                <button
-                                                    onClick={(e) => canDelete && toggleSheetSelection(e, sheet.id, index)}
-                                                    className={`flex-shrink-0 ${!canDelete ? 'opacity-30 cursor-not-allowed' : ''}`}
-                                                    disabled={!canDelete}
-                                                    title={!canDelete ? 'Cannot delete shared sheets without full permission' : ''}
-                                                >
-                                                    {isSelected
-                                                        ? <CheckSquare size={18} className="text-red-500" />
-                                                        : <SquareIcon size={18} className={darkMode ? 'text-slate-500' : 'text-slate-400'} />
-                                                    }
-                                                </button>
-                                            )}
-                                            <h3 className={`font-semibold text-sm truncate ${
-                                                darkMode
-                                                    ? (selectedSheet?.id === sheet.id ? 'text-indigo-300' : 'text-slate-200')
-                                                    : (selectedSheet?.id === sheet.id ? 'text-indigo-900' : 'text-slate-800')
-                                            }`}>{sheet.title}</h3>
-                                            <button
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    if(selectedSheet?.id === sheet.id) {
-                                                        setShowDetails(!showDetails);
-                                                    } else {
-                                                        setSelectedSheet(sheet);
-                                                        setShowDetails(true);
-                                                    }
-                                                }}
-                                                className={`p-1 rounded-full transition-transform ${selectedSheet?.id === sheet.id && showDetails ? 'rotate-180' : ''} ${darkMode ? 'hover:bg-slate-600' : 'hover:bg-slate-200/50'}`}
-                                            >
-                                                <ChevronDown size={14} className={darkMode ? 'text-slate-400' : 'text-slate-400'} />
-                                            </button>
-                                        </div>
-                                        {!isSelectionMode && (
-                                        <div className={`flex gap-1 opacity-0 group-hover:opacity-100 absolute right-2 top-3 ${darkMode ? 'bg-slate-700/80' : 'bg-white/80'} backdrop-blur-sm rounded shadow-sm`}>
-                                            {sheet.is_owner !== false && (
-                                                <button onClick={(e) => { e.stopPropagation(); openShareModal(sheet); }} className="p-1 text-slate-400 hover:text-green-500" title="Share"><Share2 size={14} /></button>
-                                            )}
-                                            <button onClick={(e) => { e.stopPropagation(); handleEdit(sheet); }} className="p-1 text-slate-400 hover:text-indigo-500"><Edit2 size={14} /></button>
-                                            {canDelete && (
-                                                <button onClick={(e) => handleDelete(e, sheet.id)} className="p-1 text-slate-400 hover:text-red-500" title="Delete"><Trash2 size={14} /></button>
-                                            )}
-                                        </div>
-                                        )}
-                                    </div>
-                                    <p className={`text-xs ${darkMode ? 'text-slate-400' : 'text-slate-500'} ${isSelectionMode ? 'ml-6' : ''}`}>{sheet.composer}</p>
-                                    <div className="flex items-center gap-2 mt-2 flex-wrap">
-                                        {sheet.instrument && <span className={`px-2 py-0.5 text-[10px] rounded-full ${darkMode ? 'bg-slate-700 text-slate-300' : 'bg-slate-100 text-slate-600'}`}>{sheet.instrument}</span>}
-                                        {sheet.difficulty && <span className={`px-2 py-0.5 text-[10px] rounded-full ${sheet.difficulty === 'Advanced' ? (darkMode ? 'bg-amber-900/50 text-amber-400' : 'bg-amber-50 text-amber-700') : (darkMode ? 'bg-slate-700 text-slate-300' : 'bg-slate-100 text-slate-600')}`}>{sheet.difficulty}</span>}
-                                        {sheet.is_owner === false && (
-                                            <span className={`px-2 py-0.5 text-[10px] rounded-full flex items-center gap-1 ${darkMode ? 'bg-green-900/50 text-green-400' : 'bg-green-50 text-green-700'}`}>
-                                                <Share2 size={10} /> Shared
-                                            </span>
-                                        )}
-                                    </div>
-                                    {selectedSheet?.id === sheet.id && showDetails && (
-                                        <div onClick={e => e.stopPropagation()} className={`mt-4 pt-4 border-t cursor-default animate-in slide-in-from-top-2 duration-200 ${darkMode ? 'border-slate-700' : 'border-slate-200'}`}>
-                                            <div className="space-y-4">
-                                                <section className="space-y-2">
-                                                    <h4 className={`text-[10px] font-bold uppercase tracking-widest ${darkMode ? 'text-slate-500' : 'text-slate-400'}`}>General Information</h4>
-                                                    <div className="grid grid-cols-1 gap-1">
-                                                        <div className={`flex items-center gap-2 text-xs ${darkMode ? 'text-slate-300' : 'text-slate-600'}`}><User size={14} className="text-slate-400"/> <span>{sheet.composer}</span></div>
-                                                        {sheet.subtitle && <div className={`flex items-center gap-2 text-xs ${darkMode ? 'text-slate-300' : 'text-slate-600'}`}><FileText size={14} className="text-slate-400"/> <span>{sheet.subtitle}</span></div>}
-                                                        <div className={`flex items-center gap-2 text-xs ${darkMode ? 'text-slate-300' : 'text-slate-600'}`}><Layers size={14} className="text-slate-400"/> <span>{sheet.instrument}</span></div>
-                                                        <div className={`flex items-center gap-2 text-xs ${darkMode ? 'text-slate-300' : 'text-slate-600'}`}><Globe size={14} className="text-slate-400"/> <span>{sheet.genre}</span></div>
-                                                    </div>
-                                                </section>
-                                                <section className="space-y-2">
-                                                    <h4 className={`text-[10px] font-bold uppercase tracking-widest ${darkMode ? 'text-slate-500' : 'text-slate-400'}`}>Musical Specs</h4>
-                                                    <div className="flex flex-wrap gap-2">
-                                                        <span className="px-2 py-1 bg-indigo-50 text-indigo-700 text-[10px] font-bold rounded">Key: {sheet.keySignature || sheet.key_signature || 'N/A'}</span>
-                                                        <span className="px-2 py-1 bg-indigo-50 text-indigo-700 text-[10px] font-bold rounded">Time: {sheet.timeSignature || sheet.time_signature || 'N/A'}</span>
-                                                        <span className="px-2 py-1 bg-indigo-50 text-indigo-700 text-[10px] font-bold rounded">BPM: {sheet.tempo || 'N/A'}</span>
-                                                    </div>
-                                                </section>
-                                                <section className="space-y-2">
-                                                    <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Tags</h4>
-                                                    <div className="flex flex-wrap gap-1">
-                                                        {(Array.isArray(sheet.tags) ? sheet.tags : (sheet.tags || '').split(',')).map((t, i) => {
-                                                            const tag = typeof t === 'string' ? t.trim() : t;
-                                                            return tag && <span key={i} className="px-2 py-0.5 bg-slate-100 text-slate-600 text-[10px] rounded flex items-center gap-1"><Tag size={8}/>{tag}</span>;
-                                                        })}
-                                                    </div>
-                                                </section>
-                                                {(() => {
-                                                    let mediaLinks = sheet.media_links || sheet.mediaLinks || [];
-                                                    if (typeof mediaLinks === 'string') {
-                                                        try { mediaLinks = JSON.parse(mediaLinks); } catch { mediaLinks = []; }
-                                                    }
-                                                    if (!Array.isArray(mediaLinks) || mediaLinks.length === 0) return null;
-                                                    const firstLink = mediaLinks[0];
-                                                    if (!firstLink || !firstLink.url) return null;
-                                                    const getEmbedUrl = (link) => {
-                                                        if (!link || !link.url) return null;
-                                                        const url = link.url;
-                                                        if (link.type === 'youtube' || url.includes('youtube.com') || url.includes('youtu.be')) {
-                                                            const match = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\s]+)/);
-                                                            return match ? `https://www.youtube.com/embed/${match[1]}` : null;
-                                                        }
-                                                        if (link.type === 'spotify' || url.includes('spotify.com')) {
-                                                            const match = url.match(/spotify\.com\/(track|album|playlist)\/([^?\s]+)/);
-                                                            return match ? `https://open.spotify.com/embed/${match[1]}/${match[2]}` : null;
-                                                        }
-                                                        return null;
-                                                    };
-                                                    const embedUrl = getEmbedUrl(firstLink);
-                                                    return (
-                                                        <section className="space-y-2">
-                                                            <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Media</h4>
-                                                            {embedUrl && (
-                                                                <div className="rounded-lg overflow-hidden border border-slate-200">
-                                                                    <iframe
-                                                                        src={embedUrl}
-                                                                        width="100%"
-                                                                        height={firstLink.type === 'spotify' ? '80' : '150'}
-                                                                        frameBorder="0"
-                                                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                                                        allowFullScreen
-                                                                        className="w-full"
-                                                                    />
-                                                                </div>
-                                                            )}
-                                                            <div className="space-y-1">
-                                                                {mediaLinks.filter(link => link && link.url).map((link, i) => (
-                                                                    <div key={i} className="flex items-center gap-2 px-2 py-1.5 bg-slate-50 rounded">
-                                                                        <a href={link.url} target="_blank" rel="noreferrer" className="flex-1 flex items-center gap-2 hover:text-indigo-600 transition-colors">
-                                                                            <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${
-                                                                                link.type === 'youtube' ? 'bg-red-100 text-red-600' :
-                                                                                link.type === 'spotify' ? 'bg-green-100 text-green-600' :
-                                                                                link.type === 'soundcloud' ? 'bg-orange-100 text-orange-600' :
-                                                                                'bg-slate-200 text-slate-600'
-                                                                            }`}>
-                                                                                {(link.type || 'link').toUpperCase()}
-                                                                            </span>
-                                                                            <span className="text-xs text-slate-700 truncate">{link.title || 'Untitled'}</span>
-                                                                        </a>
-                                                                    </div>
-                                                                ))}
-                                                            </div>
-                                                        </section>
-                                                    );
-                                                })()}
-                                                <section className="space-y-2 pt-2 border-t border-slate-100">
-                                                    <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Performance Notes</h4>
-                                                    <textarea 
-                                                        className="w-full h-32 p-3 bg-yellow-50 border border-yellow-200 rounded-lg text-slate-700 font-mono text-xs leading-relaxed resize-none focus:ring-2 focus:ring-yellow-400 outline-none" 
-                                                        value={noteContent} 
-                                                        onChange={e => setNoteContent(e.target.value)} 
-                                                        placeholder="Add performance notes..."
-                                                        onClick={e => e.stopPropagation()}
-                                                    />
-                                                    <button onClick={(e) => { e.stopPropagation(); saveChanges(); }} className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2 rounded-lg text-xs font-bold">Save Notes</button>
-                                                </section>
+                            {Object.entries(groupedSheets).map(([groupName, groupSheets]) => {
+                                const isExpanded = expandedGroups[groupName];
+                                if (!groupBy && groupName === 'All Sheets') {
+                                    // No grouping active, just render list or table
+                                    if (viewMode === 'table') {
+                                        return (
+                                            <div key="table-view" className="w-full">
+                                                <div className={`grid grid-cols-12 gap-2 px-4 py-2 border-b text-[10px] font-bold uppercase tracking-wider ${darkMode ? 'bg-slate-800 text-slate-400 border-slate-700' : 'bg-slate-100 text-slate-500 border-slate-200'}`}>
+                                                    <div className="col-span-4">Title</div>
+                                                    <div className="col-span-3">Composer</div>
+                                                    <div className="col-span-2">Instrument</div>
+                                                    <div className="col-span-2">Genre</div>
+                                                    <div className="col-span-1 text-right">Diff.</div>
+                                                </div>
+                                                {groupSheets.map((sheet, index) => renderSheetRow(sheet, index))}
                                             </div>
-                                        </div>
-                                    )}
-                                </div>
+                                        );
+                                    }
+                                    return groupSheets.map((sheet, index) => renderSheetCard(sheet, index));
+                                }
+
+                                // Grouping active
+                                return (
+                                    <div key={groupName} className="border-b last:border-0 border-slate-200 dark:border-slate-700">
+                                        <button
+                                            onClick={() => toggleGroup(groupName)}
+                                            className={`w-full flex items-center gap-2 px-4 py-3 text-left transition-colors ${darkMode ? 'hover:bg-slate-800 bg-slate-900' : 'hover:bg-slate-50 bg-white'}`}
+                                        >
+                                            <ChevronRight size={16} className={`transition-transform ${isExpanded ? 'rotate-90' : ''} ${darkMode ? 'text-slate-400' : 'text-slate-500'}`} />
+                                            <span className={`text-sm font-bold ${darkMode ? 'text-slate-200' : 'text-slate-700'}`}>{groupName}</span>
+                                            <span className={`text-xs px-2 py-0.5 rounded-full ${darkMode ? 'bg-slate-800 text-slate-400' : 'bg-slate-100 text-slate-500'}`}>{groupSheets.length}</span>
+                                        </button>
+                                        
+                                        {isExpanded && (
+                                            <div className={viewMode === 'table' ? '' : 'pl-4'}>
+                                                {viewMode === 'table' ? (
+                                                    <div className="w-full">
+                                                        {/* Header inside group? Maybe redundant if we have many groups. Let's keep it simple. */}
+                                                        {groupSheets.map((sheet, index) => renderSheetRow(sheet, index))}
+                                                    </div>
+                                                ) : (
+                                                    groupSheets.map((sheet, index) => renderSheetCard(sheet, index))
+                                                )}
+                                            </div>
+                                        )}
+                                    </div>
                                 );
                             })}
                         </div>
