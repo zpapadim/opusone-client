@@ -5,7 +5,7 @@ import {
     Eye, EyeOff, Maximize2, Minimize2,
     BookOpen, ZoomIn, ZoomOut, Play, Square, Settings,
     Edit2, Folder, FolderPlus, Save, Highlighter,
-    Download, Type, MousePointer, Pen, Info,
+    Download, Type, MousePointer, Pen, Info, Video,
     Tag, Globe, User, Layers, Eraser,
     Moon, Sun, Printer, Keyboard, Repeat, LogOut, Share2, Users,
     CheckSquare, Square as SquareIcon, Menu, Timer as MetronomeIcon,
@@ -1064,6 +1064,30 @@ function App() {
         }));
     };
 
+    const handleMediaSearch = (type) => {
+        const query = `${formData.title} ${formData.composer}`.trim();
+        if (!query) {
+            showToast('Enter title or composer first', 'warning');
+            return;
+        }
+        
+        let url = '';
+        switch (type) {
+            case 'youtube':
+                url = `https://www.youtube.com/results?search_query=${encodeURIComponent(query)}`;
+                break;
+            case 'spotify':
+                url = `https://open.spotify.com/search/${encodeURIComponent(query)}`;
+                break;
+            case 'soundcloud':
+                url = `https://soundcloud.com/search?q=${encodeURIComponent(query)}`;
+                break;
+            default:
+                url = `https://www.google.com/search?q=${encodeURIComponent(query)}`;
+        }
+        window.open(url, '_blank');
+    };
+
     const updateMediaLink = (index, field, value) => {
         setFormData(prev => ({
             ...prev,
@@ -1247,10 +1271,29 @@ function App() {
     };
 
     // Extracted details renderer
-    const renderSheetDetails = (sheet) => (
-        <div className="space-y-4">
-            <section className="space-y-2">
-                <h4 className={`text-[10px] font-bold uppercase tracking-widest ${darkMode ? 'text-slate-500' : 'text-slate-400'}`}>General Information</h4>
+    const renderSheetDetails = (sheet) => {
+        const onQuickSearch = (type) => {
+            const query = `${sheet.title} ${sheet.composer}`.trim();
+            let url = '';
+            switch (type) {
+                case 'youtube': url = `https://www.youtube.com/results?search_query=${encodeURIComponent(query)}`; break;
+                case 'spotify': url = `https://open.spotify.com/search/${encodeURIComponent(query)}`; break;
+                case 'soundcloud': url = `https://soundcloud.com/search?q=${encodeURIComponent(query)}`; break;
+            }
+            if (url) window.open(url, '_blank');
+        };
+
+        return (
+            <div className="space-y-4">
+                <section className="space-y-2">
+                    <div className="flex justify-between items-center">
+                        <h4 className={`text-[10px] font-bold uppercase tracking-widest ${darkMode ? 'text-slate-500' : 'text-slate-400'}`}>General Information</h4>
+                        <div className="flex items-center gap-2">
+                            <button onClick={() => onQuickSearch('youtube')} className="text-red-500 hover:text-red-400 p-1" title="Search YouTube"><Video size={12}/></button>
+                            <button onClick={() => onQuickSearch('spotify')} className="text-green-500 hover:text-green-400 p-1" title="Search Spotify"><Music size={12}/></button>
+                            <button onClick={() => onQuickSearch('soundcloud')} className="text-orange-500 hover:text-orange-400 p-1" title="Search SoundCloud"><Repeat size={12}/></button>
+                        </div>
+                    </div>
                 <div className="grid grid-cols-1 gap-1">
                     <div className={`flex items-center gap-2 text-xs ${darkMode ? 'text-slate-300' : 'text-slate-600'}`}><User size={14} className="text-slate-400"/> <span>{sheet.composer}</span></div>
                     {sheet.subtitle && <div className={`flex items-center gap-2 text-xs ${darkMode ? 'text-slate-300' : 'text-slate-600'}`}><FileText size={14} className="text-slate-400"/> <span>{sheet.subtitle}</span></div>}
@@ -2590,9 +2633,17 @@ function App() {
                             <div className={`mt-6 pt-6 border-t ${darkMode ? 'border-slate-700' : 'border-slate-100'}`}>
                                 <div className="flex justify-between items-center mb-3">
                                     <label className={`text-[10px] font-bold uppercase tracking-widest ${darkMode ? 'text-slate-500' : 'text-slate-400'}`}>Media Links (YouTube, Spotify, etc.)</label>
-                                    <button type="button" onClick={addMediaLink} className="text-xs text-indigo-500 hover:text-indigo-400 font-medium flex items-center gap-1">
-                                        <Plus size={14} /> Add Link
-                                    </button>
+                                    <div className="flex items-center gap-4">
+                                        <div className="flex items-center gap-2">
+                                            <span className={`text-[10px] uppercase font-bold ${darkMode ? 'text-slate-600' : 'text-slate-300'}`}>Quick Search:</span>
+                                            <button type="button" onClick={() => handleMediaSearch('youtube')} className="text-red-500 hover:text-red-400 p-1 rounded hover:bg-red-50" title="Search YouTube"><Video size={14}/></button>
+                                            <button type="button" onClick={() => handleMediaSearch('spotify')} className="text-green-500 hover:text-green-400 p-1 rounded hover:bg-green-50" title="Search Spotify"><Music size={14}/></button>
+                                            <button type="button" onClick={() => handleMediaSearch('soundcloud')} className="text-orange-500 hover:text-orange-400 p-1 rounded hover:bg-orange-50" title="Search SoundCloud"><Repeat size={14}/></button>
+                                        </div>
+                                        <button type="button" onClick={addMediaLink} className="text-xs text-indigo-500 hover:text-indigo-400 font-medium flex items-center gap-1">
+                                            <Plus size={14} /> Add Link
+                                        </button>
+                                    </div>
                                 </div>
                                 <div className="space-y-2">
                                     {formData.mediaLinks.map((link, index) => (
@@ -2607,13 +2658,27 @@ function App() {
                                                 <option value="soundcloud">SoundCloud</option>
                                                 <option value="other">Other</option>
                                             </select>
-                                            <input
-                                                type="url"
-                                                value={link.url}
-                                                onChange={(e) => updateMediaLink(index, 'url', e.target.value)}
-                                                placeholder="https://..."
-                                                className={`flex-1 p-2 border rounded text-xs ${darkMode ? 'bg-slate-600 border-slate-500 text-white placeholder-slate-400' : 'bg-white border-slate-200 text-slate-900'}`}
-                                            />
+                                            <div className="flex-1 flex gap-1">
+                                                <input
+                                                    type="url"
+                                                    value={link.url}
+                                                    onChange={(e) => updateMediaLink(index, 'url', e.target.value)}
+                                                    placeholder="https://..."
+                                                    className={`flex-1 p-2 border rounded text-xs ${darkMode ? 'bg-slate-600 border-slate-500 text-white placeholder-slate-400' : 'bg-white border-slate-200 text-slate-900'}`}
+                                                />
+                                                {['youtube', 'spotify', 'soundcloud'].includes(link.type) && (
+                                                    <button 
+                                                        type="button" 
+                                                        onClick={() => handleMediaSearch(link.type)}
+                                                        className={`px-2 rounded border flex items-center justify-center transition-colors ${
+                                                            darkMode ? 'border-slate-500 hover:bg-slate-600 text-slate-300' : 'border-slate-200 hover:bg-slate-100 text-slate-600'
+                                                        }`}
+                                                        title={`Search on ${link.type.charAt(0).toUpperCase() + link.type.slice(1)}`}
+                                                    >
+                                                        <Search size={14} />
+                                                    </button>
+                                                )}
+                                            </div>
                                             <input
                                                 type="text"
                                                 value={link.title}
