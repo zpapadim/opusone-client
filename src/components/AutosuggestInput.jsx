@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
-import { API_URL } from '../constants';
+import { API_BASE } from '../constants';
 
 const AutosuggestInput = ({ 
     name, 
@@ -35,10 +35,7 @@ const AutosuggestInput = ({
 
         setIsLoading(true);
         try {
-            // Adjust API_URL to point to the base URL if needed, assuming API_URL is http://localhost:5000/api/sheets
-            // We need http://localhost:5000/api/suggestions
-            const baseUrl = API_URL.replace('/sheets', '');
-            const res = await axios.get(`${baseUrl}/suggestions`, {
+            const res = await axios.get(`${API_BASE}/api/suggestions`, {
                 params: { field: apiField || name, q: query }
             });
             setSuggestions(res.data);

@@ -32,6 +32,7 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 
 // Import constants
 import {
+    API_BASE,
     API_URL,
     OCR_URL,
     FOLDERS_URL,
@@ -762,7 +763,7 @@ function App() {
         setShowSearchDropdown(true);
         setSearchResults([]);
 
-        axios.get(`http://localhost:5000/api/search?q=${encodeURIComponent(query)}`)
+        axios.get(`${API_BASE}/api/search?q=${encodeURIComponent(query)}`)
             .then(res => {
                 setSearchResults(res.data.results || []);
             })
@@ -814,7 +815,7 @@ function App() {
         setSearchResults([]);
 
         try {
-            const res = await axios.get(`http://localhost:5000/api/search?q=${encodeURIComponent(title)}`);
+            const res = await axios.get(`${API_BASE}/api/search?q=${encodeURIComponent(title)}`);
             setSearchResults(res.data.results || []);
         } catch (err) {
             console.error('Search failed:', err);

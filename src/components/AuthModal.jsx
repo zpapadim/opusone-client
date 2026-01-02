@@ -2,8 +2,7 @@ import { useState, useEffect } from 'react';
 import { Music, Mail, Lock, User, X, Eye, EyeOff, ArrowLeft, CheckCircle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import axios from 'axios';
-
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+import { API_BASE } from '../constants';
 
 const AuthModal = ({ darkMode, onClose, initialMode = 'login', resetToken = null }) => {
     const [mode, setMode] = useState(initialMode); // 'login', 'register', 'forgot', 'reset-sent', 'reset'
