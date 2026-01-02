@@ -64,7 +64,7 @@ const LandingPage = ({ darkMode }) => {
                             </span>
                             v1.0 is now live
                         </div>
-                        <h1 className="text-6xl md:text-8xl font-bold tracking-tight leading-[1.1] mb-8">
+                        <h1 className="text-5xl md:text-8xl font-bold tracking-tight leading-[1.1] mb-8">
                             Master your <br />
                             <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 to-purple-600">musical library.</span>
                         </h1>

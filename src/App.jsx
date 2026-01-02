@@ -8,7 +8,7 @@ import {
     Download, ChevronDown, Type, MousePointer, Pen, Info,
     Tag, Globe, User, Layers, Eraser,
     Moon, Sun, Printer, Keyboard, Repeat, LogOut, Share2, Users,
-    CheckSquare, Square as SquareIcon
+    CheckSquare, Square as SquareIcon, Menu
 } from 'lucide-react';
 import { Document, Page, pdfjs } from 'react-pdf';
 
@@ -75,6 +75,7 @@ function App() {
     const [showFolderPanel, setShowFolderPanel] = useState(true);
     const [selectedSheet, setSelectedSheet] = useState(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false); // Mobile sidebar toggle
 
     // Mass selection state
     const [selectedSheetIds, setSelectedSheetIds] = useState(new Set());
@@ -1231,8 +1232,25 @@ function App() {
                 </div>
             )}
 
+            {/* Main Application Layout */}
             {!isFullscreen && (
-                <nav className={`${darkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200'} border-b h-16 flex-none z-10 px-4 flex justify-between items-center transition-colors`}>
+                <div className="md:hidden flex items-center justify-between p-4 border-b bg-white dark:bg-slate-800 dark:border-slate-700">
+                     <div className="flex items-center gap-2">
+                        <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className="p-2 -ml-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700">
+                            <Menu size={24} className={darkMode ? 'text-white' : 'text-slate-800'} />
+                        </button>
+                        <span className={`font-bold text-lg ${darkMode ? 'text-white' : 'text-slate-800'}`}>OpusOne</span>
+                    </div>
+                     <div className="flex items-center gap-2">
+                        <button onClick={() => setShowSettings(true)} className={`p-2 rounded-lg ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>
+                             <Settings size={20} />
+                        </button>
+                     </div>
+                </div>
+            )}
+
+            {!isFullscreen && (
+                <nav className={`hidden md:flex ${darkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200'} border-b h-16 flex-none z-10 px-4 justify-between items-center transition-colors`}>
                     <div className="flex items-center gap-3">
                         <div className="bg-indigo-600 p-2 rounded-lg"><Music className="w-5 h-5 text-white" /></div>
                         <span className={`text-lg font-bold ${darkMode ? 'text-white' : 'text-slate-800'}`}>OpusOne</span>
@@ -1303,9 +1321,30 @@ function App() {
                 </nav>
             )}
 
-            <div className="flex-1 flex overflow-hidden">
+            <div className="flex-1 flex overflow-hidden relative">
+                {/* Mobile Sidebar Overlay */}
+                {isSidebarOpen && !isFullscreen && (
+                    <div 
+                        className="fixed inset-0 bg-black/50 z-20 md:hidden"
+                        onClick={() => setIsSidebarOpen(false)}
+                    />
+                )}
+
                 {!isFullscreen && (
-                    <div className={`w-1/3 min-w-[320px] max-w-md ${darkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200'} border-r flex flex-col transition-colors`}>
+                    <div className={`
+                        fixed inset-y-0 left-0 z-30 w-80 transform transition-transform duration-300 ease-in-out md:relative md:translate-x-0 md:w-1/3 md:min-w-[320px] md:max-w-md 
+                        ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+                        ${darkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200'} 
+                        border-r flex flex-col
+                    `}>
+                        {/* Mobile Close Button */}
+                        <button 
+                            onClick={() => setIsSidebarOpen(false)}
+                            className="absolute top-2 right-2 p-2 md:hidden text-slate-500 hover:bg-slate-100 rounded-full"
+                        >
+                            <X size={20} />
+                        </button>
+
                         {/* Search and Filters */}
                         <div className={`p-3 border-b ${darkMode ? 'border-slate-700' : 'border-slate-100'}`}>
                             {/* Search input */}
