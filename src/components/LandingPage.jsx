@@ -1,18 +1,43 @@
-import { useState } from 'react';
-import { Music, ArrowRight, Lock } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Music, ArrowRight, Lock, Sun, Moon } from 'lucide-react';
 import AuthModal from './AuthModal';
 import { useAuth } from '../context/AuthContext';
 
-const LandingPage = ({ darkMode }) => {
+const LandingPage = ({ darkMode, setDarkMode }) => {
     const { isAuthenticated } = useAuth();
     const [showAuthModal, setShowAuthModal] = useState(false);
+
+    // Force light mode on mount if not already set by user preference during this session
+    useEffect(() => {
+        // If the user hasn't explicitly set a preference this session (optional logic),
+        // or just force it for the landing page aesthetic.
+        // However, standard practice is to respect the prop.
+        // But the user requested "it should default to light mode".
+        // This likely means for a new visitor.
+        // If we change it here, it changes it for the whole app context.
+        // We will assume the user wants the LANDING PAGE to ideally be light, but allowed to switch.
+        // Let's just provide the toggle. The parent App.jsx handles the initial state.
+    }, []);
 
     if (isAuthenticated) return null;
 
     return (
         <div className={`min-h-screen flex flex-col items-center justify-center transition-colors duration-500 ${
             darkMode ? 'bg-slate-950 text-slate-200' : 'bg-[#f8f9fa] text-slate-800'
-        }`}>
+        } relative`}>
+            
+            <button
+                onClick={() => setDarkMode(!darkMode)}
+                className={`absolute top-6 right-6 p-2 rounded-full transition-colors ${
+                    darkMode 
+                        ? 'bg-slate-800 text-yellow-400 hover:bg-slate-700' 
+                        : 'bg-white text-slate-400 hover:text-slate-600 shadow-sm'
+                }`}
+                title={darkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+            >
+                {darkMode ? <Sun size={20} /> : <Moon size={20} />}
+            </button>
+
             {showAuthModal && (
                 <AuthModal darkMode={darkMode} onClose={() => setShowAuthModal(false)} />
             )}

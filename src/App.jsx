@@ -8,7 +8,7 @@ import {
     Download, ChevronDown, Type, MousePointer, Pen, Info,
     Tag, Globe, User, Layers, Eraser,
     Moon, Sun, Printer, Keyboard, Repeat, LogOut, Share2, Users,
-    CheckSquare, Square as SquareIcon, Menu
+    CheckSquare, Square as SquareIcon, Menu, Timer as MetronomeIcon
 } from 'lucide-react';
 import { Document, Page, pdfjs } from 'react-pdf';
 
@@ -141,6 +141,7 @@ function App() {
     // Dark Mode (persisted to localStorage)
     const [darkMode, setDarkMode] = useState(() => {
         const saved = localStorage.getItem('opusone-dark-mode');
+        // Default to light mode (false) if nothing is saved
         return saved ? JSON.parse(saved) : false;
     });
 
@@ -277,6 +278,13 @@ function App() {
                 if (isFullscreen) setIsFullscreen(false);
                 if (isModalOpen) setIsModalOpen(false);
                 if (showShortcuts) setShowShortcuts(false);
+                return;
+            }
+
+            // Global shortcut for help
+            if (e.key === '?') {
+                e.preventDefault();
+                setShowShortcuts(prev => !prev);
                 return;
             }
 
@@ -754,6 +762,7 @@ function App() {
     };
 
     const [isOcrLoading, setIsOcrLoading] = useState(false);
+    const [ocrProgress, setOcrProgress] = useState(0);
     const [searchResults, setSearchResults] = useState([]);
     const [isSearching, setIsSearching] = useState(false);
     const [showSearchDropdown, setShowSearchDropdown] = useState(false);
@@ -829,6 +838,7 @@ function App() {
     const handleOcr = async () => {
         if (!formData.file) return;
         setIsOcrLoading(true);
+        setOcrProgress(0);
         
         try {
             let fileToUpload = formData.file;
@@ -850,7 +860,13 @@ function App() {
             const data = new FormData();
             data.append('file', fileToUpload, filename);
             
-            const res = await axios.post(OCR_URL, data, { headers: { 'Content-Type': 'multipart/form-data' } });
+            const res = await axios.post(OCR_URL, data, { 
+                headers: { 'Content-Type': 'multipart/form-data' },
+                onUploadProgress: (progressEvent) => {
+                    const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+                    setOcrProgress(percentCompleted);
+                }
+            });
             
             if (res.data.title || res.data.composer) {
                 setFormData(prev => ({
@@ -872,6 +888,7 @@ function App() {
             showToast("OCR Failed", 'error');
         } finally {
             setIsOcrLoading(false);
+            setOcrProgress(0);
         }
     };
 
@@ -1077,7 +1094,7 @@ function App() {
 
     // Show landing page if not authenticated
     if (!isAuthenticated) {
-        return <LandingPage darkMode={darkMode} />;
+        return <LandingPage darkMode={darkMode} setDarkMode={setDarkMode} />;
     }
 
     return (
@@ -1908,7 +1925,7 @@ function App() {
                                         )}
                                     </div>
 
-                                    <button onClick={() => setShowMetronome(!showMetronome)} className={`p-2 rounded-lg ${showMetronome ? 'bg-indigo-600 text-white' : 'hover:bg-slate-200/20'}`} title="Metronome"><Settings size={18} /></button>
+                                    <button onClick={() => setShowMetronome(!showMetronome)} className={`p-2 rounded-lg ${showMetronome ? 'bg-indigo-600 text-white' : 'hover:bg-slate-200/20'}`} title="Metronome"><MetronomeIcon size={18} /></button>
                                     <button
                                         onClick={() => {
                                             setPracticeMode(!practiceMode);
@@ -2227,20 +2244,37 @@ function App() {
                                             </div>
                                         )}
                                         {formData.file && (
-                                            <button
-                                                type="button"
-                                                onClick={handleOcr}
-                                                disabled={isOcrLoading}
-                                                className="mt-2 text-xs font-bold text-indigo-500 hover:text-indigo-400 flex items-center gap-1 w-full justify-center"
-                                            >
-                                                {isOcrLoading ? (
-                                                    <span className="animate-pulse">Processing...</span>
-                                                ) : (
-                                                    <>
-                                                        <Search size={12} /> Auto-fill from OCR
-                                                    </>
+                                            <div className="mt-2">
+                                                <button
+                                                    type="button"
+                                                    onClick={handleOcr}
+                                                    disabled={isOcrLoading}
+                                                    className={`w-full py-2 px-4 rounded-lg text-xs font-bold flex items-center justify-center gap-2 transition-all ${
+                                                        isOcrLoading 
+                                                            ? 'bg-indigo-50 text-indigo-700 cursor-wait' 
+                                                            : 'bg-indigo-50 hover:bg-indigo-100 text-indigo-600'
+                                                    }`}
+                                                >
+                                                    {isOcrLoading ? (
+                                                        <>
+                                                            <div className="animate-spin h-3 w-3 border-2 border-indigo-500 border-t-transparent rounded-full"/>
+                                                            {ocrProgress < 100 ? `Uploading ${ocrProgress}%` : 'Processing...'}
+                                                        </>
+                                                    ) : (
+                                                        <>
+                                                            <Search size={14} /> Auto-fill Metadata from Image/PDF
+                                                        </>
+                                                    )}
+                                                </button>
+                                                {isOcrLoading && ocrProgress < 100 && (
+                                                    <div className="w-full h-1 bg-indigo-100 rounded-full mt-1 overflow-hidden">
+                                                        <div 
+                                                            className="h-full bg-indigo-500 transition-all duration-300 ease-out" 
+                                                            style={{ width: `${ocrProgress}%` }} 
+                                                        />
+                                                    </div>
                                                 )}
-                                            </button>
+                                            </div>
                                         )}
                                     </div>
                                     <div className="grid grid-cols-2 gap-3">
