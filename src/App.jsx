@@ -1191,13 +1191,13 @@ function App() {
             <div
                 key={sheet.id}
                 onClick={(e) => handleSheetClick(e, sheet, index)}
-                className={`grid grid-cols-12 gap-4 px-6 py-4 items-center text-sm transition-all duration-200 group cursor-pointer border-l-4 ${
+                className={`grid grid-cols-14 gap-6 px-8 py-5 items-center text-sm transition-all duration-200 group cursor-pointer border-l-4 ${
                     darkMode
-                        ? `${isSelected ? 'bg-red-900/20 border-red-500' : isActive ? 'bg-indigo-900/40 border-indigo-500 pl-5' : 'hover:bg-slate-800/60 border-transparent pl-5 hover:border-slate-700'}`
-                        : `${isSelected ? 'bg-red-50 border-red-500' : isActive ? 'bg-indigo-50/80 border-indigo-600 pl-5' : 'hover:bg-slate-50 border-transparent pl-5 hover:border-slate-200'}`
+                        ? `${isSelected ? 'bg-red-900/20 border-red-500' : isActive ? 'bg-indigo-900/40 border-indigo-500 pl-7' : 'hover:bg-slate-800/60 border-transparent pl-7 hover:border-slate-700'}`
+                        : `${isSelected ? 'bg-red-50 border-red-500' : isActive ? 'bg-indigo-50/80 border-indigo-600 pl-7' : 'hover:bg-slate-50 border-transparent pl-7 hover:border-slate-200'}`
                 }`}
             >
-                <div className="col-span-4 flex items-center gap-4 overflow-hidden">
+                <div className="col-span-5 flex items-center gap-4 overflow-hidden">
                     {isSelectionMode && (
                         <button
                             onClick={(e) => canDelete && toggleSheetSelection(e, sheet.id, index)}
@@ -1214,7 +1214,7 @@ function App() {
                         {sheet.subtitle && <span className={`truncate text-[10px] opacity-60 ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>{sheet.subtitle}</span>}
                     </div>
                 </div>
-                <div className={`col-span-3 truncate font-medium ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>
+                <div className={`col-span-4 truncate font-medium ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>
                     {sheet.composer || <span className="opacity-30 italic text-xs">Unknown</span>}
                 </div>
                 <div className="col-span-2">
@@ -2056,11 +2056,11 @@ function App() {
 
                         <div className={`flex-1 overflow-y-auto ${isSelectionMode ? 'select-none' : ''}`}>
                             {viewMode === 'table' && (
-                                <div className={`grid grid-cols-12 gap-4 px-6 py-4 border-b text-[10px] font-bold uppercase tracking-[0.2em] sticky top-0 z-10 ${darkMode ? 'bg-slate-800/95 text-slate-400 border-slate-700 backdrop-blur-sm shadow-sm' : 'bg-slate-50/95 text-slate-500 border-slate-200 backdrop-blur-sm shadow-sm'}`}>
-                                    <div onClick={() => handleSort('title')} className="col-span-4 cursor-pointer hover:text-indigo-500 flex items-center gap-2 transition-colors group">
+                                <div className={`grid grid-cols-14 gap-6 px-8 py-5 border-b text-[10px] font-bold uppercase tracking-wider sticky top-0 z-10 ${darkMode ? 'bg-slate-800/95 text-slate-400 border-slate-700 backdrop-blur-sm shadow-sm' : 'bg-slate-50/95 text-slate-500 border-slate-200 backdrop-blur-sm shadow-sm'}`}>
+                                    <div onClick={() => handleSort('title')} className="col-span-5 cursor-pointer hover:text-indigo-500 flex items-center gap-2 transition-colors group">
                                         Title {sortConfig.key === 'title' ? (sortConfig.direction === 'asc' ? <ChevronDown size={14} className="text-indigo-500" /> : <ChevronDown size={14} className="text-indigo-500 rotate-180" />) : <ChevronDown size={14} className="opacity-0 group-hover:opacity-50" />}
                                     </div>
-                                    <div onClick={() => handleSort('composer')} className="col-span-3 cursor-pointer hover:text-indigo-500 flex items-center gap-2 transition-colors group">
+                                    <div onClick={() => handleSort('composer')} className="col-span-4 cursor-pointer hover:text-indigo-500 flex items-center gap-2 transition-colors group">
                                         Composer {sortConfig.key === 'composer' ? (sortConfig.direction === 'asc' ? <ChevronDown size={14} className="text-indigo-500" /> : <ChevronDown size={14} className="text-indigo-500 rotate-180" />) : <ChevronDown size={14} className="opacity-0 group-hover:opacity-50" />}
                                     </div>
                                     <div onClick={() => handleSort('instrument')} className="col-span-2 cursor-pointer hover:text-indigo-500 flex items-center gap-2 transition-colors group">
