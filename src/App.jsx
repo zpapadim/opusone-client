@@ -2245,15 +2245,6 @@ function App() {
                                     >
                                         <Repeat size={18} />
                                     </button>
-                                    <button
-                                        onClick={() => {
-                                            window.print();
-                                        }}
-                                        className="p-2 hover:bg-slate-200/20 rounded-lg"
-                                        title="Print"
-                                    >
-                                        <Printer size={18} />
-                                    </button>
                                     <div className={`flex items-center ${darkMode || isFullscreen ? 'bg-slate-700' : 'bg-slate-100'} rounded-lg p-1 gap-1 ${darkMode || isFullscreen ? 'text-slate-300' : 'text-slate-500'}`}>
                                         <button onClick={() => setScale(s => Math.max(0.25, s - 0.25))} className={`p-1.5 rounded ${darkMode || isFullscreen ? 'hover:bg-slate-600 hover:text-white' : 'hover:bg-white hover:text-slate-700'}`}><ZoomOut size={16}/></button>
                                         <span className="text-xs font-mono min-w-[3rem] text-center">{Math.round(scale * 100)}%</span>
