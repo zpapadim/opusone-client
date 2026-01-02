@@ -1076,17 +1076,17 @@ function App() {
             return;
         }
         
-        // If it's a YouTube search from the form, use the internal API
-        if (type === 'youtube' && index !== null) {
+        // If it's a YouTube or Spotify search from the form, use the internal API
+        if (['youtube', 'spotify'].includes(type) && index !== null) {
             setIsMediaSearching(true);
             setShowMediaDropdown(index);
             setMediaSearchResults([]);
 
             try {
-                const res = await axios.get(`${API_BASE}/api/youtube/search?q=${encodeURIComponent(query)}`);
+                const res = await axios.get(`${API_BASE}/api/${type}/search?q=${encodeURIComponent(query)}`);
                 setMediaSearchResults(res.data.results || []);
             } catch (err) {
-                const msg = err.response?.data?.hint || err.response?.data?.error || 'YouTube search failed';
+                const msg = err.response?.data?.hint || err.response?.data?.error || `${type} search failed`;
                 showToast(msg, err.response?.status === 503 ? 'info' : 'error');
                 setShowMediaDropdown(null);
             } finally {
@@ -2682,49 +2682,49 @@ function App() {
                                             </select>
                                             <div className="flex-1 flex flex-col gap-1 relative">
                                                 <div className="flex gap-1">
-                                                    <input
-                                                        type="url"
-                                                        value={link.url}
-                                                        onChange={(e) => updateMediaLink(index, 'url', e.target.value)}
-                                                        placeholder="https://..."
-                                                        className={`flex-1 p-2 border rounded text-xs ${darkMode ? 'bg-slate-600 border-slate-500 text-white placeholder-slate-400' : 'bg-white border-slate-200 text-slate-900'}`}
-                                                    />
-                                                    {link.type === 'youtube' && (
-                                                        <button 
-                                                            type="button" 
-                                                            onClick={() => handleMediaSearch(link.type, index)}
-                                                            disabled={isMediaSearching}
-                                                            className={`px-2 rounded border flex items-center justify-center transition-colors ${
-                                                                darkMode ? 'border-slate-500 hover:bg-slate-600 text-slate-300' : 'border-slate-200 hover:bg-slate-100 text-slate-600'
-                                                            }`}
-                                                            title="Search YouTube"
-                                                        >
-                                                            {isMediaSearching && showMediaDropdown === index ? (
-                                                                <div className="animate-spin w-3 h-3 border-2 border-indigo-500 border-t-transparent rounded-full"></div>
-                                                            ) : (
+                                                        <input
+                                                            type="url"
+                                                            value={link.url}
+                                                            onChange={(e) => updateMediaLink(index, 'url', e.target.value)}
+                                                            placeholder="https://..."
+                                                            className={`flex-1 p-2 border rounded text-xs ${darkMode ? 'bg-slate-600 border-slate-500 text-white placeholder-slate-400' : 'bg-white border-slate-200 text-slate-900'}`}
+                                                        />
+                                                        {['youtube', 'spotify'].includes(link.type) && (
+                                                            <button 
+                                                                type="button" 
+                                                                onClick={() => handleMediaSearch(link.type, index)}
+                                                                disabled={isMediaSearching}
+                                                                className={`px-2 rounded border flex items-center justify-center transition-colors ${
+                                                                    darkMode ? 'border-slate-500 hover:bg-slate-600 text-slate-300' : 'border-slate-200 hover:bg-slate-100 text-slate-600'
+                                                                }`}
+                                                                title={`Search ${link.type === 'youtube' ? 'YouTube' : 'Spotify'}`}
+                                                            >
+                                                                {isMediaSearching && showMediaDropdown === index ? (
+                                                                    <div className="animate-spin w-3 h-3 border-2 border-indigo-500 border-t-transparent rounded-full"></div>
+                                                                ) : (
+                                                                    <Search size={14} />
+                                                                )}
+                                                            </button>
+                                                        )}
+                                                        {link.type === 'soundcloud' && (
+                                                            <button 
+                                                                type="button" 
+                                                                onClick={() => handleMediaSearch(link.type)}
+                                                                className={`px-2 rounded border flex items-center justify-center transition-colors ${
+                                                                    darkMode ? 'border-slate-500 hover:bg-slate-600 text-slate-300' : 'border-slate-200 hover:bg-slate-100 text-slate-600'
+                                                                }`}
+                                                                title="Search SoundCloud"
+                                                            >
                                                                 <Search size={14} />
-                                                            )}
-                                                        </button>
-                                                    )}
-                                                    {['spotify', 'soundcloud'].includes(link.type) && (
-                                                        <button 
-                                                            type="button" 
-                                                            onClick={() => handleMediaSearch(link.type)}
-                                                            className={`px-2 rounded border flex items-center justify-center transition-colors ${
-                                                                darkMode ? 'border-slate-500 hover:bg-slate-600 text-slate-300' : 'border-slate-200 hover:bg-slate-100 text-slate-600'
-                                                            }`}
-                                                            title={`Search on ${link.type.charAt(0).toUpperCase() + link.type.slice(1)}`}
-                                                        >
-                                                            <Search size={14} />
-                                                        </button>
-                                                    )}
+                                                            </button>
+                                                        )}
                                                 </div>
 
                                                 {/* Media Search Dropdown */}
                                                 {showMediaDropdown === index && (
                                                     <div className={`absolute z-30 w-full mt-1 border rounded-lg shadow-xl max-h-64 overflow-y-auto top-full ${darkMode ? 'bg-slate-700 border-slate-600' : 'bg-white border-slate-200'}`}>
                                                         <div className={`flex items-center justify-between px-3 py-1.5 border-b sticky top-0 ${darkMode ? 'bg-slate-800 border-slate-600' : 'bg-slate-50 border-slate-100'}`}>
-                                                            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">YouTube Results</span>
+                                                            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">{link.type} Results</span>
                                                             <button type="button" onClick={() => setShowMediaDropdown(null)} className="text-slate-400 hover:text-slate-600">
                                                                 <X size={12} />
                                                             </button>
