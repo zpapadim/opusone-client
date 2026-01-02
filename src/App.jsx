@@ -74,6 +74,7 @@ function App() {
     const [folders, setFolders] = useState([]);
     const [selectedFolder, setSelectedFolder] = useState(null); // null = All
     const [showFolderPanel, setShowFolderPanel] = useState(true);
+    const [showSearchPanel, setShowSearchPanel] = useState(true);
     const [selectedSheet, setSelectedSheet] = useState(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isSidebarOpen, setIsSidebarOpen] = useState(false); // Mobile sidebar toggle
@@ -1752,20 +1753,32 @@ function App() {
                         </button>
 
                         {/* Search and Filters */}
-                        <div className={`p-3 border-b flex-shrink-0 ${darkMode ? 'border-slate-700' : 'border-slate-100'}`}>
-                            <div className="flex items-center justify-between mb-3 px-1">
-                                <h3 className={`text-[10px] font-bold uppercase tracking-widest ${darkMode ? 'text-slate-500' : 'text-slate-400'}`}>Search & Filters</h3>
-                                {(searchQuery || activeFilters.length > 0 || selectedFolder || groupBy) && (
-                                    <button 
-                                        onClick={clearAllFilters}
-                                        className="text-[10px] font-bold text-indigo-500 hover:text-indigo-400 flex items-center gap-1"
-                                        title="Clear all filters, search, folder and grouping"
-                                    >
-                                        <Eraser size={12} /> CLEAR ALL
-                                    </button>
-                                )}
+                        <div className={`border-b flex-shrink-0 ${darkMode ? 'border-slate-700' : 'border-slate-100'}`}>
+                            <div 
+                                onClick={() => setShowSearchPanel(!showSearchPanel)}
+                                className={`p-3 flex items-center justify-between cursor-pointer transition-colors ${darkMode ? 'hover:bg-slate-800' : 'hover:bg-slate-50'}`}
+                            >
+                                <div className="flex items-center gap-2">
+                                    <Search size={16} className={darkMode ? 'text-slate-400' : 'text-slate-500'} />
+                                    <h3 className={`text-xs font-bold uppercase tracking-widest ${darkMode ? 'text-slate-500' : 'text-slate-400'}`}>Search & Filters</h3>
+                                </div>
+                                <div className="flex items-center gap-3">
+                                    {(searchQuery || activeFilters.length > 0 || selectedFolder || groupBy) && (
+                                        <button 
+                                            onClick={(e) => { e.stopPropagation(); clearAllFilters(); }}
+                                            className="text-[10px] font-bold text-indigo-500 hover:text-indigo-400 flex items-center gap-1"
+                                            title="Clear all"
+                                        >
+                                            <Eraser size={12} /> CLEAR
+                                        </button>
+                                    )}
+                                    <ChevronDown size={16} className={`text-slate-400 transition-transform ${showSearchPanel ? '' : '-rotate-90'}`} />
+                                </div>
                             </div>
-                            {/* Search input */}
+
+                            {showSearchPanel && (
+                                <div className="p-3 pt-0 animate-in slide-in-from-top-2 duration-200">
+                                    {/* Search input */}
                             <div className="relative mb-3">
                                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
                                 <input
@@ -1929,23 +1942,24 @@ function App() {
                                 </div>
                             )}
                         </div>
+                    )}
+                </div>
 
-                        <div className={`border-b flex-shrink-0 ${darkMode ? 'border-slate-700 bg-slate-800/50' : 'border-slate-100 bg-slate-50'}`}>
-                            <div
-                                onClick={() => setShowFolderPanel(!showFolderPanel)}
-                                className={`w-full p-3 flex justify-between items-center transition-colors cursor-pointer ${darkMode ? 'hover:bg-slate-700' : 'hover:bg-slate-100'}`}
-                            >
-                                <div className="flex items-center gap-2">
-                                    <Folder size={16} className={darkMode ? 'text-slate-400' : 'text-slate-500'} />
-                                    <h3 className={`text-xs font-bold uppercase tracking-wider ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>Folders</h3>
-                                    <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${darkMode ? 'bg-slate-700 text-slate-400' : 'bg-slate-200 text-slate-600'}`}>{folders.length}</span>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                    <button onClick={(e) => { e.stopPropagation(); createFolder(); }} className="text-indigo-500 hover:text-indigo-400 p-1"><FolderPlus size={14}/></button>
-                                    <ChevronDown size={16} className={`text-slate-400 transition-transform ${showFolderPanel ? '' : '-rotate-90'}`} />
-                                </div>
-                            </div>
-                            {showFolderPanel && (
+                <div className={`border-b flex-shrink-0 ${darkMode ? 'border-slate-700 bg-slate-800/50' : 'border-slate-100 bg-slate-50'}`}>
+                                        <div
+                                            onClick={() => setShowFolderPanel(!showFolderPanel)}
+                                            className={`w-full p-3 flex justify-between items-center transition-colors cursor-pointer ${darkMode ? 'hover:bg-slate-700' : 'hover:bg-slate-100'}`}
+                                        >
+                                            <div className="flex items-center gap-2">
+                                                <Folder size={16} className={darkMode ? 'text-slate-400' : 'text-slate-500'} />
+                                                <h3 className={`text-xs font-bold uppercase tracking-wider ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>Folders</h3>
+                                                <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${darkMode ? 'bg-slate-700 text-slate-400' : 'bg-slate-200 text-slate-600'}`}>{folders.length}</span>
+                                            </div>
+                                            <div className="flex items-center gap-2">
+                                                <button onClick={(e) => { e.stopPropagation(); createFolder(); }} className="text-indigo-500 hover:text-indigo-400 p-1"><FolderPlus size={14}/></button>
+                                                <ChevronDown size={16} className={`text-slate-400 transition-transform ${showFolderPanel ? '' : '-rotate-90'}`} />
+                                            </div>
+                                        </div>                            {showFolderPanel && (
                                 <div className="max-h-48 overflow-y-auto px-2 pb-2">
                                     <button
                                         onClick={() => setSelectedFolder(null)}
