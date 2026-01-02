@@ -1176,27 +1176,36 @@ function App() {
             <div
                 key={sheet.id}
                 onClick={(e) => handleSheetClick(e, sheet, index)}
-                className={`grid grid-cols-12 gap-2 px-4 py-2 border-b items-center text-xs transition-colors group cursor-pointer ${
+                className={`grid grid-cols-12 gap-4 px-4 py-3 items-center text-sm transition-colors group cursor-pointer ${
                     darkMode
-                        ? `border-slate-800 ${isSelected ? 'bg-red-900/30' : selectedSheet?.id === sheet.id ? 'bg-indigo-900/50' : 'hover:bg-slate-800'}`
-                        : `border-slate-100 ${isSelected ? 'bg-red-50' : selectedSheet?.id === sheet.id ? 'bg-indigo-50' : 'hover:bg-slate-50'}`
+                        ? `${isSelected ? 'bg-red-900/30' : selectedSheet?.id === sheet.id ? 'bg-indigo-900/50 border-l-4 border-l-indigo-500 pl-3' : 'hover:bg-slate-800/50 border-l-4 border-l-transparent pl-3'}`
+                        : `${isSelected ? 'bg-red-50' : selectedSheet?.id === sheet.id ? 'bg-indigo-50 border-l-4 border-l-indigo-600 pl-3' : 'hover:bg-slate-50 border-l-4 border-l-transparent pl-3'}`
                 }`}
             >
-                <div className="col-span-4 flex items-center gap-2 overflow-hidden">
+                <div className="col-span-4 flex items-center gap-3 overflow-hidden">
                     {isSelectionMode && (
                         <button
                             onClick={(e) => canDelete && toggleSheetSelection(e, sheet.id, index)}
                             disabled={!canDelete}
+                            className="flex-shrink-0"
                         >
-                            {isSelected ? <CheckSquare size={14} className="text-red-500" /> : <SquareIcon size={14} className="text-slate-400" />}
+                            {isSelected ? <CheckSquare size={16} className="text-red-500" /> : <SquareIcon size={16} className="text-slate-400" />}
                         </button>
                     )}
                     <span className={`truncate font-medium ${darkMode ? 'text-slate-200' : 'text-slate-700'}`}>{sheet.title}</span>
                 </div>
-                <div className={`col-span-3 truncate ${darkMode ? 'text-slate-400' : 'text-slate-600'}`}>{sheet.composer}</div>
-                <div className={`col-span-2 truncate ${darkMode ? 'text-slate-500' : 'text-slate-500'}`}>{sheet.instrument}</div>
-                <div className={`col-span-2 truncate ${darkMode ? 'text-slate-500' : 'text-slate-500'}`}>{sheet.genre}</div>
-                <div className={`col-span-1 text-right ${darkMode ? 'text-slate-500' : 'text-slate-500'}`}>{sheet.difficulty === 'Intermediate' ? 'Int.' : sheet.difficulty}</div>
+                <div className={`col-span-3 truncate text-xs ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>{sheet.composer}</div>
+                <div className={`col-span-2 truncate text-xs ${darkMode ? 'text-slate-500' : 'text-slate-500'}`}>{sheet.instrument}</div>
+                <div className={`col-span-2 truncate text-xs ${darkMode ? 'text-slate-500' : 'text-slate-500'}`}>{sheet.genre}</div>
+                <div className="col-span-1 flex justify-end">
+                    <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium truncate ${
+                        sheet.difficulty === 'Advanced' 
+                            ? (darkMode ? 'bg-amber-900/30 text-amber-400' : 'bg-amber-100 text-amber-700')
+                            : (darkMode ? 'bg-slate-800 text-slate-400' : 'bg-slate-100 text-slate-600')
+                    }`}>
+                        {sheet.difficulty === 'Intermediate' ? 'Int.' : sheet.difficulty}
+                    </span>
+                </div>
             </div>
         );
     };
@@ -1764,23 +1773,28 @@ function App() {
                             </div>
 
                             {/* Group By Selector */}
-                            <div className="mt-3 pt-3 border-t border-dashed border-slate-200 dark:border-slate-700">
-                                <label className={`text-[10px] font-bold uppercase tracking-widest block mb-1 ${darkMode ? 'text-slate-500' : 'text-slate-400'}`}>Group By</label>
-                                <select
-                                    value={groupBy}
-                                    onChange={(e) => setGroupBy(e.target.value)}
-                                    className={`w-full text-xs px-2 py-1.5 rounded-lg border outline-none ${
-                                        groupBy
-                                            ? 'bg-indigo-100 border-indigo-300 text-indigo-700'
-                                            : darkMode ? 'bg-slate-700 border-slate-600 text-slate-300' : 'bg-white border-slate-200 text-slate-600'
-                                    }`}
-                                >
-                                    <option value="">None (Flat List)</option>
-                                    <option value="composer">Composer</option>
-                                    <option value="genre">Genre</option>
-                                    <option value="difficulty">Difficulty</option>
-                                    <option value="instrument">Instrument</option>
-                                </select>
+                            <div className={`mt-6 pt-4 border-t ${darkMode ? 'border-slate-700' : 'border-slate-100'}`}>
+                                <h4 className={`text-[10px] font-bold uppercase tracking-widest mb-3 flex items-center gap-2 ${darkMode ? 'text-slate-500' : 'text-slate-400'}`}>
+                                    <LayoutList size={12} /> Organization
+                                </h4>
+                                <div className="relative">
+                                    <select
+                                        value={groupBy}
+                                        onChange={(e) => setGroupBy(e.target.value)}
+                                        className={`w-full appearance-none text-xs pl-3 pr-8 py-2 rounded-lg border outline-none cursor-pointer transition-colors ${
+                                            groupBy
+                                                ? 'bg-indigo-50 border-indigo-200 text-indigo-700 font-medium'
+                                                : darkMode ? 'bg-slate-800 border-slate-700 text-slate-300 hover:border-slate-600' : 'bg-white border-slate-200 text-slate-600 hover:border-slate-300'
+                                        }`}
+                                    >
+                                        <option value="">No Grouping</option>
+                                        <option value="composer">By Composer</option>
+                                        <option value="genre">By Genre</option>
+                                        <option value="difficulty">By Difficulty</option>
+                                        <option value="instrument">By Instrument</option>
+                                    </select>
+                                    <ChevronDown size={14} className={`absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none ${groupBy ? 'text-indigo-500' : 'text-slate-400'}`} />
+                                </div>
                             </div>
 
                             {/* Active filters & results count */}
@@ -2014,14 +2028,26 @@ function App() {
                                     if (viewMode === 'table') {
                                         return (
                                             <div key="table-view" className="w-full">
-                                                <div className={`grid grid-cols-12 gap-2 px-4 py-2 border-b text-[10px] font-bold uppercase tracking-wider ${darkMode ? 'bg-slate-800 text-slate-400 border-slate-700' : 'bg-slate-100 text-slate-500 border-slate-200'}`}>
-                                                    <div className="col-span-4">Title</div>
-                                                    <div className="col-span-3">Composer</div>
-                                                    <div className="col-span-2">Instrument</div>
-                                                    <div className="col-span-2">Genre</div>
-                                                    <div className="col-span-1 text-right">Diff.</div>
+                                                <div className={`grid grid-cols-12 gap-4 px-4 py-3 border-b text-xs font-bold uppercase tracking-wider ${darkMode ? 'bg-slate-800 text-slate-400 border-slate-700' : 'bg-slate-100 text-slate-500 border-slate-200'}`}>
+                                                    <div onClick={() => handleSort('title')} className="col-span-4 cursor-pointer hover:text-indigo-500 flex items-center gap-1 transition-colors">
+                                                        Title {sortConfig.key === 'title' && <ChevronDown size={12} className={`transition-transform ${sortConfig.direction === 'desc' ? 'rotate-180' : ''}`} />}
+                                                    </div>
+                                                    <div onClick={() => handleSort('composer')} className="col-span-3 cursor-pointer hover:text-indigo-500 flex items-center gap-1 transition-colors">
+                                                        Composer {sortConfig.key === 'composer' && <ChevronDown size={12} className={`transition-transform ${sortConfig.direction === 'desc' ? 'rotate-180' : ''}`} />}
+                                                    </div>
+                                                    <div onClick={() => handleSort('instrument')} className="col-span-2 cursor-pointer hover:text-indigo-500 flex items-center gap-1 transition-colors">
+                                                        Instrument {sortConfig.key === 'instrument' && <ChevronDown size={12} className={`transition-transform ${sortConfig.direction === 'desc' ? 'rotate-180' : ''}`} />}
+                                                    </div>
+                                                    <div onClick={() => handleSort('genre')} className="col-span-2 cursor-pointer hover:text-indigo-500 flex items-center gap-1 transition-colors">
+                                                        Genre {sortConfig.key === 'genre' && <ChevronDown size={12} className={`transition-transform ${sortConfig.direction === 'desc' ? 'rotate-180' : ''}`} />}
+                                                    </div>
+                                                    <div onClick={() => handleSort('difficulty')} className="col-span-1 text-right cursor-pointer hover:text-indigo-500 flex items-center justify-end gap-1 transition-colors">
+                                                        Diff. {sortConfig.key === 'difficulty' && <ChevronDown size={12} className={`transition-transform ${sortConfig.direction === 'desc' ? 'rotate-180' : ''}`} />}
+                                                    </div>
                                                 </div>
-                                                {groupSheets.map((sheet, index) => renderSheetRow(sheet, index))}
+                                                <div className="divide-y divide-slate-100 dark:divide-slate-700/50">
+                                                    {groupSheets.map((sheet, index) => renderSheetRow(sheet, index))}
+                                                </div>
                                             </div>
                                         );
                                     }
