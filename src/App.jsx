@@ -1389,7 +1389,8 @@ function App() {
                 <button onClick={(e) => { e.stopPropagation(); saveChanges(); }} className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2 rounded-lg text-xs font-bold">Save Notes</button>
             </section>
         </div>
-    ); // Original filtering logic is already applied in fetchData/backend
+        );
+    };
 
     const filteredSheets = sheets; // Original filtering logic is already applied in fetchData/backend
 
