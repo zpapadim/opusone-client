@@ -1666,8 +1666,8 @@ function App() {
 
                 {!isFullscreen && (
                     <div className={`
-                        fixed inset-y-0 left-0 z-40 w-full max-w-[300px] transform transition-transform duration-300 ease-in-out 
-                        md:relative md:translate-x-0 md:w-80 lg:w-96 md:max-w-none
+                        fixed inset-y-0 left-0 z-40 w-full max-w-[300px] h-full transform transition-transform duration-300 ease-in-out 
+                        md:relative md:translate-x-0 md:w-80 lg:w-96 md:max-w-none md:h-full
                         ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
                         ${darkMode ? 'bg-slate-900 border-r border-slate-800' : 'bg-white border-r border-slate-200'} 
                         flex flex-col shadow-2xl md:shadow-none
@@ -1681,7 +1681,7 @@ function App() {
                         </button>
 
                         {/* Search and Filters */}
-                        <div className={`p-3 border-b ${darkMode ? 'border-slate-700' : 'border-slate-100'}`}>
+                        <div className={`p-3 border-b flex-shrink-0 ${darkMode ? 'border-slate-700' : 'border-slate-100'}`}>
                             {/* Search input */}
                             <div className="relative mb-3">
                                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
@@ -1847,7 +1847,7 @@ function App() {
                             )}
                         </div>
 
-                        <div className={`border-b ${darkMode ? 'border-slate-700 bg-slate-800/50' : 'border-slate-100 bg-slate-50'}`}>
+                        <div className={`border-b flex-shrink-0 ${darkMode ? 'border-slate-700 bg-slate-800/50' : 'border-slate-100 bg-slate-50'}`}>
                             <div
                                 onClick={() => setShowFolderPanel(!showFolderPanel)}
                                 className={`w-full p-3 flex justify-between items-center transition-colors cursor-pointer ${darkMode ? 'hover:bg-slate-700' : 'hover:bg-slate-100'}`}
@@ -1985,7 +1985,7 @@ function App() {
                         </div>
 
                         {/* Selection Mode & View Toggle Toolbar */}
-                        <div className={`p-2 border-b flex items-center justify-between ${isSelectionMode ? (darkMode ? 'bg-red-900/20 border-slate-700' : 'bg-red-50 border-slate-200') : (darkMode ? 'border-slate-700' : 'border-slate-200')}`}>
+                        <div className={`p-2 border-b flex-shrink-0 flex items-center justify-between ${isSelectionMode ? (darkMode ? 'bg-red-900/20 border-slate-700' : 'bg-red-50 border-slate-200') : (darkMode ? 'border-slate-700' : 'border-slate-200')}`}>
                             {isSelectionMode ? (
                                 <div className="flex items-center gap-3">
                                     <button
