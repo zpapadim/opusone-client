@@ -1335,7 +1335,8 @@ function App() {
 
                 {!isFullscreen && (
                     <div className={`
-                        fixed inset-y-0 left-0 z-40 w-80 transform transition-transform duration-300 ease-in-out md:relative md:translate-x-0 md:w-1/3 md:min-w-[320px] md:max-w-md 
+                        fixed inset-y-0 left-0 z-40 w-full max-w-[300px] transform transition-transform duration-300 ease-in-out 
+                        md:relative md:translate-x-0 md:w-80 lg:w-96 md:max-w-none
                         ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
                         ${darkMode ? 'bg-slate-900 border-r border-slate-800' : 'bg-white border-r border-slate-200'} 
                         flex flex-col shadow-2xl md:shadow-none
