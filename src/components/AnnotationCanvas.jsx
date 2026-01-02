@@ -4,6 +4,7 @@ const AnnotationCanvas = ({
     pageNumber,
     width,
     height,
+    scale,
     tool,
     color,
     size,
@@ -36,7 +37,7 @@ const AnnotationCanvas = ({
             if (ann.type === 'path') {
                 ctx.beginPath();
                 ctx.strokeStyle = colorStr;
-                ctx.lineWidth = ann.strokeWidth || 5;
+                ctx.lineWidth = (ann.strokeWidth || 5) * scale;
                 ctx.lineCap = 'round';
                 ctx.lineJoin = 'round';
                 ann.points.forEach((p, i) => {
@@ -47,7 +48,7 @@ const AnnotationCanvas = ({
                 });
                 ctx.stroke();
             } else if (ann.type === 'text') {
-                ctx.font = `${(ann.size || 12) * (width / 600)}px Helvetica`;
+                ctx.font = `${(ann.size || 12) * scale}px Helvetica`;
                 ctx.fillStyle = colorStr;
                 ctx.textBaseline = 'top';
                 ctx.fillText(ann.text, ann.x * width, ann.y * height);
@@ -58,7 +59,7 @@ const AnnotationCanvas = ({
             const activeColor = JSON.parse(color);
             ctx.beginPath();
             ctx.strokeStyle = `rgba(${activeColor.r * 255}, ${activeColor.g * 255}, ${activeColor.b * 255}, ${tool === 'highlighter' ? 0.5 : 1})`;
-            ctx.lineWidth = size;
+            ctx.lineWidth = size * scale;
             ctx.lineCap = 'round';
             ctx.lineJoin = 'round';
             currentPath.forEach((p, i) => {
@@ -69,7 +70,7 @@ const AnnotationCanvas = ({
             });
             ctx.stroke();
         }
-    }, [annotations, pageNumber, width, height, currentPath, color, size, tool, showOriginal]);
+    }, [annotations, pageNumber, width, height, scale, currentPath, color, size, tool, showOriginal]);
 
     // Find annotation at click position (for eraser)
     const findAnnotationAt = (coords) => {
@@ -181,7 +182,7 @@ const AnnotationCanvas = ({
                     style={{
                         left: `${textInput.x * 100}%`,
                         top: `${textInput.y * 100}%`,
-                        fontSize: `${size}px`,
+                        fontSize: `${size * scale}px`,
                         color: `rgb(${JSON.parse(color).r * 255}, ${JSON.parse(color).g * 255}, ${JSON.parse(color).b * 255})`,
                         transform: 'translateY(-50%)'
                     }}

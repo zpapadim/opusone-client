@@ -167,7 +167,7 @@ function App() {
     const practiceTimerRef = useRef(null);
 
     // Print Mode
-    const [isPrintMode, setIsPrintMode] = useState(false);
+    // Removed unused isPrintMode state
 
     // Toast Notifications
     const [toasts, setToasts] = useState([]);
@@ -255,7 +255,7 @@ function App() {
             await axios.delete(`${endpoint}/${shareTarget.id}/share`, { data: { email } });
             showToast(`Removed access for ${email}`, 'success');
             setCurrentShares(currentShares.filter(s => s.user.email !== email));
-        } catch (err) {
+        } catch {
             showToast('Failed to remove access', 'error');
         }
     };
@@ -460,7 +460,10 @@ function App() {
 
     const fetchData = useCallback(async () => {
         try {
-            const params = {};
+            const params = {
+                sort_by: sortConfig.key,
+                order: sortConfig.direction
+            };
             if (searchQuery) params.q = searchQuery;
             
             // Handle folder filtering
@@ -489,7 +492,7 @@ function App() {
         } catch (err) {
             console.error(err);
         }
-    }, [searchQuery, activeFilters, selectedFolder, user?.id]);
+    }, [searchQuery, activeFilters, selectedFolder, user?.id, sortConfig]);
 
     useEffect(() => {
         if (isAuthenticated && token) {
@@ -540,6 +543,10 @@ function App() {
     };
 
 
+
+    const changePage = (offset) => {
+        setPageNumber(prev => Math.max(1, Math.min(numPages || 1, prev + offset)));
+    };
 
     const onAddAnnotation = (pageNum, annotation) => {
         setAnnotations(prev => ({
@@ -743,7 +750,7 @@ function App() {
         } else if (Array.isArray(sheet.mediaLinks)) {
             mediaLinksArray = sheet.mediaLinks;
         } else if (typeof sheet.media_links === 'string') {
-            try { mediaLinksArray = JSON.parse(sheet.media_links); } catch (e) { }
+            try { mediaLinksArray = JSON.parse(sheet.media_links); } catch { /* ignore */ }
         }
 
         setFormData({
@@ -935,7 +942,6 @@ function App() {
         } catch (err) { console.error(err); }
     };
 
-    const [batchQueue, setBatchQueue] = useState([]);
     const [isBatchProcessing, setIsBatchProcessing] = useState(false);
     const [batchConflict, setBatchConflict] = useState(null);
     const [batchProgress, setBatchProgress] = useState({ current: 0, total: 0 });
@@ -960,7 +966,6 @@ function App() {
             };
         });
 
-        setBatchQueue(queue);
         setBatchProgress({ current: 0, total: queue.length });
         setIsBatchProcessing(true);
         setOperationProgress({ type: 'upload', current: 0, total: queue.length, message: 'Starting upload...' });
@@ -971,7 +976,6 @@ function App() {
     const processNextBatchItem = async (queue, index) => {
         if (index >= queue.length) {
             setIsBatchProcessing(false);
-            setBatchQueue([]);
             setBatchConflict(null);
             setOperationProgress(null);
             showToast("Batch upload complete!", 'success');
@@ -1181,38 +1185,59 @@ function App() {
     const renderSheetRow = (sheet, index) => {
         const canDelete = sheet.is_owner !== false || sheet.share_permission === 'full';
         const isSelected = selectedSheetIds.has(sheet.id);
+        const isActive = selectedSheet?.id === sheet.id;
+        
         return (
             <div
                 key={sheet.id}
                 onClick={(e) => handleSheetClick(e, sheet, index)}
-                className={`grid grid-cols-12 gap-4 px-4 py-3 items-center text-sm transition-colors group cursor-pointer ${
+                className={`grid grid-cols-12 gap-4 px-6 py-4 items-center text-sm transition-all duration-200 group cursor-pointer border-l-4 ${
                     darkMode
-                        ? `${isSelected ? 'bg-red-900/30' : selectedSheet?.id === sheet.id ? 'bg-indigo-900/50 border-l-4 border-l-indigo-500 pl-3' : 'hover:bg-slate-800/50 border-l-4 border-l-transparent pl-3'}`
-                        : `${isSelected ? 'bg-red-50' : selectedSheet?.id === sheet.id ? 'bg-indigo-50 border-l-4 border-l-indigo-600 pl-3' : 'hover:bg-slate-50 border-l-4 border-l-transparent pl-3'}`
+                        ? `${isSelected ? 'bg-red-900/20 border-red-500' : isActive ? 'bg-indigo-900/40 border-indigo-500 pl-5' : 'hover:bg-slate-800/60 border-transparent pl-5 hover:border-slate-700'}`
+                        : `${isSelected ? 'bg-red-50 border-red-500' : isActive ? 'bg-indigo-50/80 border-indigo-600 pl-5' : 'hover:bg-slate-50 border-transparent pl-5 hover:border-slate-200'}`
                 }`}
             >
-                <div className="col-span-4 flex items-center gap-3 overflow-hidden">
+                <div className="col-span-4 flex items-center gap-4 overflow-hidden">
                     {isSelectionMode && (
                         <button
                             onClick={(e) => canDelete && toggleSheetSelection(e, sheet.id, index)}
                             disabled={!canDelete}
-                            className="flex-shrink-0"
+                            className="flex-shrink-0 transition-transform active:scale-90"
                         >
-                            {isSelected ? <CheckSquare size={16} className="text-red-500" /> : <SquareIcon size={16} className="text-slate-400" />}
+                            {isSelected ? <CheckSquare size={18} className="text-red-500" /> : <SquareIcon size={18} className={darkMode ? 'text-slate-600' : 'text-slate-300'} />}
                         </button>
                     )}
-                    <span className={`truncate font-medium ${darkMode ? 'text-slate-200' : 'text-slate-700'}`}>{sheet.title}</span>
+                    <div className="flex flex-col min-w-0">
+                        <span className={`truncate font-semibold tracking-tight ${darkMode ? (isActive ? 'text-indigo-300' : 'text-slate-200') : (isActive ? 'text-indigo-900' : 'text-slate-800')}`}>
+                            {sheet.title}
+                        </span>
+                        {sheet.subtitle && <span className={`truncate text-[10px] opacity-60 ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>{sheet.subtitle}</span>}
+                    </div>
                 </div>
-                <div className={`col-span-3 truncate text-xs ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>{sheet.composer}</div>
-                <div className={`col-span-2 truncate text-xs ${darkMode ? 'text-slate-500' : 'text-slate-500'}`}>{sheet.instrument}</div>
-                <div className={`col-span-2 truncate text-xs ${darkMode ? 'text-slate-500' : 'text-slate-500'}`}>{sheet.genre}</div>
+                <div className={`col-span-3 truncate font-medium ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>
+                    {sheet.composer || <span className="opacity-30 italic text-xs">Unknown</span>}
+                </div>
+                <div className="col-span-2">
+                    {sheet.instrument ? (
+                        <span className={`px-2 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider ${darkMode ? 'bg-slate-800 text-slate-300 border border-slate-700' : 'bg-slate-100 text-slate-600 border border-slate-200'}`}>
+                            {sheet.instrument}
+                        </span>
+                    ) : (
+                        <span className="opacity-20">—</span>
+                    )}
+                </div>
+                <div className={`col-span-2 truncate text-xs font-medium ${darkMode ? 'text-slate-500' : 'text-slate-400'}`}>
+                    {sheet.genre_name || sheet.genre || <span className="opacity-20">—</span>}
+                </div>
                 <div className="col-span-1 flex justify-end">
-                    <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium truncate ${
+                    <span className={`text-[9px] px-2 py-1 rounded-full font-black uppercase tracking-tighter shadow-sm border ${
                         sheet.difficulty === 'Advanced' 
-                            ? (darkMode ? 'bg-amber-900/30 text-amber-400' : 'bg-amber-100 text-amber-700')
-                            : (darkMode ? 'bg-slate-800 text-slate-400' : 'bg-slate-100 text-slate-600')
+                            ? (darkMode ? 'bg-amber-900/30 text-amber-400 border-amber-800/50' : 'bg-amber-50 text-amber-700 border-amber-200')
+                            : sheet.difficulty === 'Professional'
+                                ? (darkMode ? 'bg-red-900/30 text-red-400 border-red-800/50' : 'bg-red-50 text-red-700 border-red-200')
+                                : (darkMode ? 'bg-slate-800 text-slate-400 border-slate-700' : 'bg-slate-100 text-slate-500 border-slate-200')
                     }`}>
-                        {sheet.difficulty === 'Intermediate' ? 'Int.' : sheet.difficulty}
+                        {sheet.difficulty === 'Intermediate' ? 'INT' : sheet.difficulty === 'Professional' ? 'PRO' : sheet.difficulty === 'Advanced' ? 'ADV' : 'BEG'}
                     </span>
                 </div>
             </div>
@@ -2030,6 +2055,26 @@ function App() {
                         </div>
 
                         <div className={`flex-1 overflow-y-auto ${isSelectionMode ? 'select-none' : ''}`}>
+                            {viewMode === 'table' && (
+                                <div className={`grid grid-cols-12 gap-4 px-6 py-4 border-b text-[10px] font-bold uppercase tracking-[0.2em] sticky top-0 z-10 ${darkMode ? 'bg-slate-800/95 text-slate-400 border-slate-700 backdrop-blur-sm shadow-sm' : 'bg-slate-50/95 text-slate-500 border-slate-200 backdrop-blur-sm shadow-sm'}`}>
+                                    <div onClick={() => handleSort('title')} className="col-span-4 cursor-pointer hover:text-indigo-500 flex items-center gap-2 transition-colors group">
+                                        Title {sortConfig.key === 'title' ? (sortConfig.direction === 'asc' ? <ChevronDown size={14} className="text-indigo-500" /> : <ChevronDown size={14} className="text-indigo-500 rotate-180" />) : <ChevronDown size={14} className="opacity-0 group-hover:opacity-50" />}
+                                    </div>
+                                    <div onClick={() => handleSort('composer')} className="col-span-3 cursor-pointer hover:text-indigo-500 flex items-center gap-2 transition-colors group">
+                                        Composer {sortConfig.key === 'composer' ? (sortConfig.direction === 'asc' ? <ChevronDown size={14} className="text-indigo-500" /> : <ChevronDown size={14} className="text-indigo-500 rotate-180" />) : <ChevronDown size={14} className="opacity-0 group-hover:opacity-50" />}
+                                    </div>
+                                    <div onClick={() => handleSort('instrument')} className="col-span-2 cursor-pointer hover:text-indigo-500 flex items-center gap-2 transition-colors group">
+                                        Instrument {sortConfig.key === 'instrument' ? (sortConfig.direction === 'asc' ? <ChevronDown size={14} className="text-indigo-500" /> : <ChevronDown size={14} className="text-indigo-500 rotate-180" />) : <ChevronDown size={14} className="opacity-0 group-hover:opacity-50" />}
+                                    </div>
+                                    <div onClick={() => handleSort('genre')} className="col-span-2 cursor-pointer hover:text-indigo-500 flex items-center gap-2 transition-colors group">
+                                        Genre {sortConfig.key === 'genre' ? (sortConfig.direction === 'asc' ? <ChevronDown size={14} className="text-indigo-500" /> : <ChevronDown size={14} className="text-indigo-500 rotate-180" />) : <ChevronDown size={14} className="opacity-0 group-hover:opacity-50" />}
+                                    </div>
+                                    <div onClick={() => handleSort('difficulty')} className="col-span-1 text-right cursor-pointer hover:text-indigo-500 flex items-center justify-end gap-2 transition-colors group">
+                                        Diff. {sortConfig.key === 'difficulty' ? (sortConfig.direction === 'asc' ? <ChevronDown size={14} className="text-indigo-500" /> : <ChevronDown size={14} className="text-indigo-500 rotate-180" />) : <ChevronDown size={14} className="opacity-0 group-hover:opacity-50" />}
+                                    </div>
+                                </div>
+                            )}
+
                             {Object.entries(groupedSheets).map(([groupName, groupSheets]) => {
                                 const isExpanded = expandedGroups[groupName];
                                 if (!groupBy && groupName === 'All Sheets') {
@@ -2037,23 +2082,6 @@ function App() {
                                     if (viewMode === 'table') {
                                         return (
                                             <div key="table-view" className="w-full">
-                                                <div className={`grid grid-cols-12 gap-4 px-4 py-3 border-b text-xs font-bold uppercase tracking-wider ${darkMode ? 'bg-slate-800 text-slate-400 border-slate-700' : 'bg-slate-100 text-slate-500 border-slate-200'}`}>
-                                                    <div onClick={() => handleSort('title')} className="col-span-4 cursor-pointer hover:text-indigo-500 flex items-center gap-1 transition-colors">
-                                                        Title {sortConfig.key === 'title' && <ChevronDown size={12} className={`transition-transform ${sortConfig.direction === 'desc' ? 'rotate-180' : ''}`} />}
-                                                    </div>
-                                                    <div onClick={() => handleSort('composer')} className="col-span-3 cursor-pointer hover:text-indigo-500 flex items-center gap-1 transition-colors">
-                                                        Composer {sortConfig.key === 'composer' && <ChevronDown size={12} className={`transition-transform ${sortConfig.direction === 'desc' ? 'rotate-180' : ''}`} />}
-                                                    </div>
-                                                    <div onClick={() => handleSort('instrument')} className="col-span-2 cursor-pointer hover:text-indigo-500 flex items-center gap-1 transition-colors">
-                                                        Instrument {sortConfig.key === 'instrument' && <ChevronDown size={12} className={`transition-transform ${sortConfig.direction === 'desc' ? 'rotate-180' : ''}`} />}
-                                                    </div>
-                                                    <div onClick={() => handleSort('genre')} className="col-span-2 cursor-pointer hover:text-indigo-500 flex items-center gap-1 transition-colors">
-                                                        Genre {sortConfig.key === 'genre' && <ChevronDown size={12} className={`transition-transform ${sortConfig.direction === 'desc' ? 'rotate-180' : ''}`} />}
-                                                    </div>
-                                                    <div onClick={() => handleSort('difficulty')} className="col-span-1 text-right cursor-pointer hover:text-indigo-500 flex items-center justify-end gap-1 transition-colors">
-                                                        Diff. {sortConfig.key === 'difficulty' && <ChevronDown size={12} className={`transition-transform ${sortConfig.direction === 'desc' ? 'rotate-180' : ''}`} />}
-                                                    </div>
-                                                </div>
                                                 <div className="divide-y divide-slate-100 dark:divide-slate-700/50">
                                                     {groupSheets.map((sheet, index) => renderSheetRow(sheet, index))}
                                                 </div>
@@ -2079,7 +2107,6 @@ function App() {
                                             <div className={viewMode === 'table' ? '' : 'pl-4'}>
                                                 {viewMode === 'table' ? (
                                                     <div className="w-full">
-                                                        {/* Header inside group? Maybe redundant if we have many groups. Let's keep it simple. */}
                                                         {groupSheets.map((sheet, index) => renderSheetRow(sheet, index))}
                                                     </div>
                                                 ) : (
@@ -2157,11 +2184,7 @@ function App() {
                                     </button>
                                     <button
                                         onClick={() => {
-                                            setIsPrintMode(true);
-                                            setTimeout(() => {
-                                                window.print();
-                                                setIsPrintMode(false);
-                                            }, 100);
+                                            window.print();
                                         }}
                                         className="p-2 hover:bg-slate-200/20 rounded-lg"
                                         title="Print"
@@ -2210,13 +2233,13 @@ function App() {
                                     <Document file={selectedSheet.file_url || `${UPLOADS_URL}/${selectedSheet.filename}`} onLoadSuccess={onDocumentLoadSuccess} className="shadow-2xl">
                                         <div className="flex gap-4">
                                             <div className="relative">
-                                                <Page pageNumber={pageNumber} scale={scale} renderTextLayer={false} renderAnnotationLayer={false} onLoadSuccess={(p) => setPageDimensions(prev => ({...prev, [pageNumber]: {width:p.width, height:p.height}}))} />
-                                                {pageDimensions[pageNumber] && <AnnotationCanvas pageNumber={pageNumber} width={pageDimensions[pageNumber].width * scale} height={pageDimensions[pageNumber].height * scale} tool={tool} color={color} size={size} isAnnotating={isAnnotating} annotations={annotations} onAddAnnotation={onAddAnnotation} onRemoveAnnotation={onRemoveAnnotation} showOriginal={showOriginal} />}
+                                                <Page pageNumber={pageNumber} scale={scale} renderTextLayer={false} renderAnnotationLayer={false} onLoadSuccess={(p) => setPageDimensions(prev => ({...prev, [pageNumber]: {width: p.width / scale, height: p.height / scale}}))} />
+                                                {pageDimensions[pageNumber] && <AnnotationCanvas pageNumber={pageNumber} width={pageDimensions[pageNumber].width * scale} height={pageDimensions[pageNumber].height * scale} scale={scale} tool={tool} color={color} size={size} isAnnotating={isAnnotating} annotations={annotations} onAddAnnotation={onAddAnnotation} onRemoveAnnotation={onRemoveAnnotation} showOriginal={showOriginal} />}
                                             </div>
                                             {isDualPage && pageNumber + 1 <= numPages && (
                                                 <div className="relative">
-                                                    <Page pageNumber={pageNumber + 1} scale={scale} renderTextLayer={false} renderAnnotationLayer={false} onLoadSuccess={(p) => setPageDimensions(prev => ({...prev, [pageNumber + 1]: {width:p.width, height:p.height}}))} />
-                                                    {pageDimensions[pageNumber + 1] && <AnnotationCanvas pageNumber={pageNumber + 1} width={pageDimensions[pageNumber + 1].width * scale} height={pageDimensions[pageNumber + 1].height * scale} tool={tool} color={color} size={size} isAnnotating={isAnnotating} annotations={annotations} onAddAnnotation={onAddAnnotation} onRemoveAnnotation={onRemoveAnnotation} showOriginal={showOriginal} />}
+                                                    <Page pageNumber={pageNumber + 1} scale={scale} renderTextLayer={false} renderAnnotationLayer={false} onLoadSuccess={(p) => setPageDimensions(prev => ({...prev, [pageNumber + 1]: {width: p.width / scale, height: p.height / scale}}))} />
+                                                    {pageDimensions[pageNumber + 1] && <AnnotationCanvas pageNumber={pageNumber + 1} width={pageDimensions[pageNumber + 1].width * scale} height={pageDimensions[pageNumber + 1].height * scale} scale={scale} tool={tool} color={color} size={size} isAnnotating={isAnnotating} annotations={annotations} onAddAnnotation={onAddAnnotation} onRemoveAnnotation={onRemoveAnnotation} showOriginal={showOriginal} />}
                                                 </div>
                                             )}
                                         </div>
