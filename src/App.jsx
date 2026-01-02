@@ -1234,26 +1234,29 @@ function App() {
 
             {/* Main Application Layout */}
             {!isFullscreen && (
-                <div className="md:hidden flex items-center justify-between p-4 border-b bg-white dark:bg-slate-800 dark:border-slate-700">
-                     <div className="flex items-center gap-2">
-                        <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className="p-2 -ml-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700">
-                            <Menu size={24} className={darkMode ? 'text-white' : 'text-slate-800'} />
+                <div className="md:hidden flex items-center justify-between px-4 py-3 bg-white dark:bg-slate-900 border-b dark:border-slate-800 shadow-sm z-20 relative">
+                     <div className="flex items-center gap-3">
+                        <button 
+                            onClick={() => setIsSidebarOpen(!isSidebarOpen)} 
+                            className="p-2 -ml-2 rounded-full active:bg-slate-100 dark:active:bg-slate-800 transition-colors"
+                        >
+                            <Menu size={24} className={darkMode ? 'text-slate-200' : 'text-slate-700'} />
                         </button>
-                        <span className={`font-bold text-lg ${darkMode ? 'text-white' : 'text-slate-800'}`}>OpusOne</span>
+                        <span className={`font-serif text-xl ${darkMode ? 'text-slate-200' : 'text-slate-800'}`}>OpusOne</span>
                     </div>
                      <div className="flex items-center gap-2">
-                        <button onClick={() => setShowSettings(true)} className={`p-2 rounded-lg ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>
-                             <Settings size={20} />
-                        </button>
+                        {/* Mobile Actions could go here */}
                      </div>
                 </div>
             )}
 
             {!isFullscreen && (
-                <nav className={`hidden md:flex ${darkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200'} border-b h-16 flex-none z-10 px-4 justify-between items-center transition-colors`}>
+                <nav className={`hidden md:flex ${darkMode ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'} border-b h-16 flex-none z-10 px-6 justify-between items-center transition-colors`}>
                     <div className="flex items-center gap-3">
-                        <div className="bg-indigo-600 p-2 rounded-lg"><Music className="w-5 h-5 text-white" /></div>
-                        <span className={`text-lg font-bold ${darkMode ? 'text-white' : 'text-slate-800'}`}>OpusOne</span>
+                        <div className={`p-2 rounded-xl ${darkMode ? 'bg-slate-800' : 'bg-slate-100'}`}>
+                            <Music className={`w-5 h-5 ${darkMode ? 'text-indigo-400' : 'text-slate-700'}`} />
+                        </div>
+                        <span className={`text-lg font-serif tracking-tight ${darkMode ? 'text-slate-200' : 'text-slate-800'}`}>OpusOne</span>
                     </div>
                     <div className="flex-1" /> {/* Spacer */}
                     <div className="flex items-center gap-2">
@@ -1325,22 +1328,22 @@ function App() {
                 {/* Mobile Sidebar Overlay */}
                 {isSidebarOpen && !isFullscreen && (
                     <div 
-                        className="fixed inset-0 bg-black/50 z-20 md:hidden"
+                        className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-30 md:hidden"
                         onClick={() => setIsSidebarOpen(false)}
                     />
                 )}
 
                 {!isFullscreen && (
                     <div className={`
-                        fixed inset-y-0 left-0 z-30 w-80 transform transition-transform duration-300 ease-in-out md:relative md:translate-x-0 md:w-1/3 md:min-w-[320px] md:max-w-md 
+                        fixed inset-y-0 left-0 z-40 w-80 transform transition-transform duration-300 ease-in-out md:relative md:translate-x-0 md:w-1/3 md:min-w-[320px] md:max-w-md 
                         ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
-                        ${darkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200'} 
-                        border-r flex flex-col
+                        ${darkMode ? 'bg-slate-900 border-r border-slate-800' : 'bg-white border-r border-slate-200'} 
+                        flex flex-col shadow-2xl md:shadow-none
                     `}>
                         {/* Mobile Close Button */}
                         <button 
                             onClick={() => setIsSidebarOpen(false)}
-                            className="absolute top-2 right-2 p-2 md:hidden text-slate-500 hover:bg-slate-100 rounded-full"
+                            className={`absolute top-4 right-4 p-2 md:hidden rounded-full ${darkMode ? 'text-slate-400 hover:bg-slate-800' : 'text-slate-500 hover:bg-slate-100'}`}
                         >
                             <X size={20} />
                         </button>
