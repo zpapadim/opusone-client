@@ -1299,12 +1299,20 @@ function App() {
                             onChange={handleBatchSelect}
                             className="hidden"
                         />
-                        <button onClick={() => batchInputRef.current?.click()} className={`${darkMode ? 'bg-slate-700 border-slate-600 hover:bg-slate-600 text-slate-200' : 'bg-white border-slate-200 hover:bg-slate-50 text-slate-700'} border px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 transition-colors shadow-sm`}>
-                            <Upload size={18} /><span>Batch Upload</span>
-                        </button>
-                        <button onClick={() => { setEditingId(null); resetForm(); setIsModalOpen(true); }} className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 transition-colors shadow-sm">
-                            <Plus size={18} /><span>Add Sheet</span>
-                        </button>
+                                        <button
+                                            onClick={() => batchInputRef.current?.click()}
+                                            className={`${darkMode ? 'bg-slate-700 border-slate-600 hover:bg-slate-600 text-slate-200' : 'bg-white border-slate-200 hover:bg-slate-50 text-slate-700'} border px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 transition-colors shadow-sm`}
+                                            title="Upload multiple files at once"
+                                        >
+                                            <Upload size={18} /><span>Batch Upload</span>
+                                        </button>
+                                        <button
+                                            onClick={() => { setEditingId(null); resetForm(); setIsModalOpen(true); }}
+                                            className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 transition-colors shadow-sm"
+                                            title="Create a new sheet music entry"
+                                        >
+                                            <Plus size={18} /><span>Add Sheet</span>
+                                        </button>
                         {/* Auth buttons */}
                         <div className={`w-px h-6 ${darkMode ? 'bg-slate-600' : 'bg-slate-200'}`} />
                         {isAuthenticated ? (
