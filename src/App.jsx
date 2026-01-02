@@ -2,10 +2,10 @@ import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import axios from 'axios';
 import {
     Plus, Trash2, FileText, Music, Search, X, Upload, Filter,
-    ChevronRight, Eye, EyeOff, Maximize2, Minimize2,
+    Eye, EyeOff, Maximize2, Minimize2,
     BookOpen, ZoomIn, ZoomOut, Play, Square, Settings,
     Edit2, Folder, FolderPlus, Save, Highlighter,
-    Download, ChevronDown, Type, MousePointer, Pen, Info,
+    Download, Type, MousePointer, Pen, Info,
     Tag, Globe, User, Layers, Eraser,
     Moon, Sun, Printer, Keyboard, Repeat, LogOut, Share2, Users,
     CheckSquare, Square as SquareIcon, Menu, Timer as MetronomeIcon,
