@@ -1191,20 +1191,20 @@ function App() {
             <div
                 key={sheet.id}
                 onClick={(e) => handleSheetClick(e, sheet, index)}
-                className={`grid grid-cols-14 gap-6 px-8 py-5 items-center text-sm transition-all duration-200 group cursor-pointer border-l-4 ${
+                className={`grid grid-cols-14 gap-3 px-4 pr-4 py-4 items-center text-sm transition-all duration-200 group cursor-pointer border-l-4 ${
                     darkMode
-                        ? `${isSelected ? 'bg-red-900/20 border-red-500' : isActive ? 'bg-indigo-900/40 border-indigo-500 pl-7' : 'hover:bg-slate-800/60 border-transparent pl-7 hover:border-slate-700'}`
-                        : `${isSelected ? 'bg-red-50 border-red-500' : isActive ? 'bg-indigo-50/80 border-indigo-600 pl-7' : 'hover:bg-slate-50 border-transparent pl-7 hover:border-slate-200'}`
+                        ? `${isSelected ? 'bg-red-900/20 border-red-500 pl-3' : isActive ? 'bg-indigo-900/40 border-indigo-500 pl-3' : 'hover:bg-slate-800/60 border-transparent pl-3 hover:border-slate-700'}`
+                        : `${isSelected ? 'bg-red-50 border-red-500 pl-3' : isActive ? 'bg-indigo-50/80 border-indigo-600 pl-3' : 'hover:bg-slate-50 border-transparent pl-3 hover:border-slate-200'}`
                 }`}
             >
-                <div className="col-span-5 flex items-center gap-4 overflow-hidden">
+                <div className="col-span-5 flex items-center gap-3 overflow-hidden">
                     {isSelectionMode && (
                         <button
                             onClick={(e) => canDelete && toggleSheetSelection(e, sheet.id, index)}
                             disabled={!canDelete}
                             className="flex-shrink-0 transition-transform active:scale-90"
                         >
-                            {isSelected ? <CheckSquare size={18} className="text-red-500" /> : <SquareIcon size={18} className={darkMode ? 'text-slate-600' : 'text-slate-300'} />}
+                            {isSelected ? <CheckSquare size={16} className="text-red-500" /> : <SquareIcon size={16} className={darkMode ? 'text-slate-600' : 'text-slate-300'} />}
                         </button>
                     )}
                     <div className="flex flex-col min-w-0">
@@ -1219,18 +1219,18 @@ function App() {
                 </div>
                 <div className="col-span-2">
                     {sheet.instrument ? (
-                        <span className={`px-2 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider ${darkMode ? 'bg-slate-800 text-slate-300 border border-slate-700' : 'bg-slate-100 text-slate-600 border border-slate-200'}`}>
-                            {sheet.instrument}
+                        <span className={`px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider ${darkMode ? 'bg-slate-800 text-slate-300 border border-slate-700' : 'bg-slate-100 text-slate-600 border border-slate-200'}`}>
+                            {sheet.instrument.length > 8 ? sheet.instrument.substring(0, 6) + '...' : sheet.instrument}
                         </span>
                     ) : (
                         <span className="opacity-20">—</span>
                     )}
                 </div>
-                <div className={`col-span-2 truncate text-xs font-medium ${darkMode ? 'text-slate-500' : 'text-slate-400'}`}>
+                <div className={`col-span-2 truncate text-[10px] font-medium ${darkMode ? 'text-slate-500' : 'text-slate-400'}`}>
                     {sheet.genre_name || sheet.genre || <span className="opacity-20">—</span>}
                 </div>
                 <div className="col-span-1 flex justify-end">
-                    <span className={`text-[9px] px-2 py-1 rounded-full font-black uppercase tracking-tighter shadow-sm border ${
+                    <span className={`text-[8px] px-1.5 py-0.5 rounded-full font-black uppercase tracking-tighter shadow-sm border ${
                         sheet.difficulty === 'Advanced' 
                             ? (darkMode ? 'bg-amber-900/30 text-amber-400 border-amber-800/50' : 'bg-amber-50 text-amber-700 border-amber-200')
                             : sheet.difficulty === 'Professional'
@@ -2056,21 +2056,21 @@ function App() {
 
                         <div className={`flex-1 overflow-y-auto ${isSelectionMode ? 'select-none' : ''}`}>
                             {viewMode === 'table' && (
-                                <div className={`grid grid-cols-14 gap-6 px-8 py-5 border-b text-[10px] font-bold uppercase tracking-wider sticky top-0 z-10 ${darkMode ? 'bg-slate-800/95 text-slate-400 border-slate-700 backdrop-blur-sm shadow-sm' : 'bg-slate-50/95 text-slate-500 border-slate-200 backdrop-blur-sm shadow-sm'}`}>
-                                    <div onClick={() => handleSort('title')} className="col-span-5 cursor-pointer hover:text-indigo-500 flex items-center gap-2 transition-colors group">
-                                        Title {sortConfig.key === 'title' ? (sortConfig.direction === 'asc' ? <ChevronDown size={14} className="text-indigo-500" /> : <ChevronDown size={14} className="text-indigo-500 rotate-180" />) : <ChevronDown size={14} className="opacity-0 group-hover:opacity-50" />}
+                                <div className={`grid grid-cols-14 gap-3 px-4 py-4 border-b border-l-4 border-l-transparent text-[10px] font-bold uppercase tracking-wider sticky top-0 z-10 ${darkMode ? 'bg-slate-800/95 text-slate-400 border-slate-700 backdrop-blur-sm shadow-sm' : 'bg-slate-50/95 text-slate-500 border-slate-200 backdrop-blur-sm shadow-sm'}`}>
+                                    <div onClick={() => handleSort('title')} className="col-span-5 cursor-pointer hover:text-indigo-500 flex items-center gap-1.5 transition-colors group">
+                                        Title {sortConfig.key === 'title' ? (sortConfig.direction === 'asc' ? <ChevronDown size={12} className="text-indigo-500" /> : <ChevronDown size={12} className="text-indigo-500 rotate-180" />) : <ChevronDown size={12} className="opacity-0 group-hover:opacity-50" />}
                                     </div>
-                                    <div onClick={() => handleSort('composer')} className="col-span-4 cursor-pointer hover:text-indigo-500 flex items-center gap-2 transition-colors group">
-                                        Composer {sortConfig.key === 'composer' ? (sortConfig.direction === 'asc' ? <ChevronDown size={14} className="text-indigo-500" /> : <ChevronDown size={14} className="text-indigo-500 rotate-180" />) : <ChevronDown size={14} className="opacity-0 group-hover:opacity-50" />}
+                                    <div onClick={() => handleSort('composer')} className="col-span-4 cursor-pointer hover:text-indigo-500 flex items-center gap-1.5 transition-colors group">
+                                        Composer {sortConfig.key === 'composer' ? (sortConfig.direction === 'asc' ? <ChevronDown size={12} className="text-indigo-500" /> : <ChevronDown size={12} className="text-indigo-500 rotate-180" />) : <ChevronDown size={12} className="opacity-0 group-hover:opacity-50" />}
                                     </div>
-                                    <div onClick={() => handleSort('instrument')} className="col-span-2 cursor-pointer hover:text-indigo-500 flex items-center gap-2 transition-colors group">
-                                        Instrument {sortConfig.key === 'instrument' ? (sortConfig.direction === 'asc' ? <ChevronDown size={14} className="text-indigo-500" /> : <ChevronDown size={14} className="text-indigo-500 rotate-180" />) : <ChevronDown size={14} className="opacity-0 group-hover:opacity-50" />}
+                                    <div onClick={() => handleSort('instrument')} className="col-span-2 cursor-pointer hover:text-indigo-500 flex items-center gap-1.5 transition-colors group">
+                                        Inst. {sortConfig.key === 'instrument' ? (sortConfig.direction === 'asc' ? <ChevronDown size={12} className="text-indigo-500" /> : <ChevronDown size={12} className="text-indigo-500 rotate-180" />) : <ChevronDown size={12} className="opacity-0 group-hover:opacity-50" />}
                                     </div>
-                                    <div onClick={() => handleSort('genre')} className="col-span-2 cursor-pointer hover:text-indigo-500 flex items-center gap-2 transition-colors group">
-                                        Genre {sortConfig.key === 'genre' ? (sortConfig.direction === 'asc' ? <ChevronDown size={14} className="text-indigo-500" /> : <ChevronDown size={14} className="text-indigo-500 rotate-180" />) : <ChevronDown size={14} className="opacity-0 group-hover:opacity-50" />}
+                                    <div onClick={() => handleSort('genre')} className="col-span-2 cursor-pointer hover:text-indigo-500 flex items-center gap-1.5 transition-colors group">
+                                        Genre {sortConfig.key === 'genre' ? (sortConfig.direction === 'asc' ? <ChevronDown size={12} className="text-indigo-500" /> : <ChevronDown size={12} className="text-indigo-500 rotate-180" />) : <ChevronDown size={12} className="opacity-0 group-hover:opacity-50" />}
                                     </div>
-                                    <div onClick={() => handleSort('difficulty')} className="col-span-1 text-right cursor-pointer hover:text-indigo-500 flex items-center justify-end gap-2 transition-colors group">
-                                        Diff. {sortConfig.key === 'difficulty' ? (sortConfig.direction === 'asc' ? <ChevronDown size={14} className="text-indigo-500" /> : <ChevronDown size={14} className="text-indigo-500 rotate-180" />) : <ChevronDown size={14} className="opacity-0 group-hover:opacity-50" />}
+                                    <div onClick={() => handleSort('difficulty')} className="col-span-1 text-right cursor-pointer hover:text-indigo-500 flex items-center justify-end gap-1.5 transition-colors group">
+                                        Diff. {sortConfig.key === 'difficulty' ? (sortConfig.direction === 'asc' ? <ChevronDown size={12} className="text-indigo-500" /> : <ChevronDown size={12} className="text-indigo-500 rotate-180" />) : <ChevronDown size={12} className="opacity-0 group-hover:opacity-50" />}
                                     </div>
                                 </div>
                             )}
